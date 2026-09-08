@@ -1,0 +1,58 @@
+# CI Pipeline - Bloque C: Toma de Decisiones
+# Ejecuta eval + guardrails (incluyendo NO_DANIEL) en cada push/PR
+
+name: CI - Eval & Guardrails
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validar Quiz & Guardrails
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Ejecutar Eval (quiz answers)
+        run: python eval_quiz.py presentacion/ia_bloque_c.html
+
+      - name: Ejecutar Guardrails (quality checks + NO_DANIEL)
+        run: python guardrails.py presentacion/ia_bloque_c.html
+
+      - name: Verificar estructura del repositorio
+        run: |
+          echo "Verificando archivos requeridos..."
+          test -f README.md || (echo "FAIL: README.md" && exit 1)
+          test -f ARCHITECTURE.md || (echo "FAIL: ARCHITECTURE.md" && exit 1)
+          test -f AI_USAGE.md || (echo "FAIL: AI_USAGE.md" && exit 1)
+          test -f CLAUDE.md || (echo "FAIL: CLAUDE.md" && exit 1)
+          test -f references/references.bib || (echo "FAIL: references.bib" && exit 1)
+          test -f presentacion/ia_bloque_c.html || (echo "FAIL: HTML" && exit 1)
+          echo "Todos los archivos requeridos existen."
+
+      - name: Verificar NO Daniel Ruffo en archivos
+        run: |
+          echo "Verificando que Daniel Ruffo NO aparece..."
+          if grep -r "Daniel Ruffo" --include="*.html" --include="*.md" --exclude-dir=.github .; then
+            echo "FAIL: 'Daniel Ruffo' encontrado en archivos del Team C"
+            exit 1
+          fi
+          echo "PASS: Daniel Ruffo no aparece en ningun archivo."
+
+      - name: Verificar HTML valido
+        run: |
+          grep -q '<!DOCTYPE html>' presentacion/ia_bloque_c.html || \
+            grep -q '<!doctype html>' presentacion/ia_bloque_c.html || \
+            (echo "FAIL: No DOCTYPE" && exit 1)
+          grep -q '</html>' presentacion/ia_bloque_c.html || \
+            (echo "FAIL: HTML no cierra" && exit 1)
+          echo "HTML OK."

@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>IA Bloque C</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+:root {
+  --navy: #232F3F;
+  --cyan: #28B4E7;
+  --amber: #FCBB6B;
+  --tan: #D4AF8D;
+  --guinda: #9F2241;
+  --verde: #235B4E;
+  --dorado: #BC955C;
+  --bg: #F5F7FA;
+  --surface: #FFFFFF;
+  --surface-alt: #EDF1F7;
+  --text: #1A2332;
+  --text-dim: #5A6577;
+  --border: #D1D9E6;
+  --code-bg: #1B2838;
+  --code-text: #E2E8F0;
+  --success: #3A7D5C;
+  --error: #C45B5B;
+  --tab-hover: rgba(40, 180, 231, 0.08);
+  --kw: #C792EA; --fn: #82AAFF; --str: #A8D08D; --cmt: #6A7B8B;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1B2A; --surface: #162233; --surface-alt: #1D2D42;
+    --text: #E2E8F0; --text-dim: #8896A7; --border: #2A3A50;
+    --code-bg: #0A1424; --tab-hover: rgba(40,180,231,0.12);
+    --success: #5CB88A; --error: #E07070;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1B2A; --surface: #162233; --surface-alt: #1D2D42;
+  --text: #E2E8F0; --text-dim: #8896A7; --border: #2A3A50;
+  --code-bg: #0A1424; --tab-hover: rgba(40,180,231,0.12);
+  --success: #5CB88A; --error: #E07070;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Source Sans 3',-apple-system,sans-serif; line-height:1.65; min-height:100vh; }
+
+.header { background:linear-gradient(135deg,var(--navy) 0%,#1a3a5c 100%); color:#fff; padding:1.5rem 2rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
+.header-brand { display:flex; align-items:center; gap:0.75rem; }
+.unrc-badge { background:var(--guinda); color:#fff; font-size:0.65rem; font-weight:700; letter-spacing:0.08em; padding:0.3rem 0.6rem; border-radius:3px; text-transform:uppercase; white-space:nowrap; }
+.header-text { flex:1; min-width:220px; }
+.header-text h1 { font-family:'JetBrains Mono',monospace; font-size:1.5rem; font-weight:700; line-height:1.2; }
+.header-text h1 .bracket { color:var(--amber); }
+.header-meta { font-size:0.85rem; opacity:0.85; margin-top:0.35rem; }
+.header-team { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.team-chip { background:rgba(255,255,255,0.15); font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:20px; white-space:nowrap; }
+
+.tab-bar { display:flex; background:var(--surface); border-bottom:2px solid var(--border); overflow-x:auto; position:sticky; top:0; z-index:100; }
+.tab-btn { font-family:'Source Sans 3',sans-serif; font-size:0.85rem; font-weight:600; padding:0.85rem 1.2rem; border:none; background:transparent; color:var(--text-dim); cursor:pointer; white-space:nowrap; border-bottom:3px solid transparent; transition:all 0.2s; }
+.tab-btn:hover { background:var(--tab-hover); color:var(--text); }
+.tab-btn.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+.content { max-width:960px; margin:0 auto; padding:2rem 1.5rem; }
+.section { margin-bottom:2.5rem; }
+.section-label { font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); margin-bottom:0.4rem; }
+.section h2 { font-size:1.35rem; font-weight:700; margin-bottom:1rem; text-wrap:balance; }
+.section h3 { font-size:1.05rem; font-weight:700; margin:1.5rem 0 0.6rem; }
+.section p { margin-bottom:0.8rem; max-width:65ch; }
+
+.concept-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; margin:1.2rem 0; }
+.concept-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1.2rem; border-top:3px solid var(--cyan); }
+.concept-card.t2 { border-top-color:var(--amber); }
+.concept-card.t3 { border-top-color:var(--guinda); }
+.concept-card.t4 { border-top-color:var(--verde); }
+.concept-card h4 { font-family:'JetBrains Mono',monospace; font-size:0.9rem; margin-bottom:0.5rem; }
+.concept-card p { font-size:0.88rem; color:var(--text-dim); margin-bottom:0.4rem; }
+
+.code-block { background:var(--code-bg); color:var(--code-text); font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.6; padding:1.2rem; border-radius:6px; overflow-x:auto; margin:1rem 0; white-space:pre; }
+.code-block .kw { color:var(--kw); } .code-block .fn { color:var(--fn); } .code-block .str { color:var(--str); } .code-block .cmt { color:var(--cmt); font-style:italic; }
+
+.table-wrap { overflow-x:auto; margin:1rem 0; }
+table { width:100%; border-collapse:collapse; font-size:0.88rem; font-variant-numeric:tabular-nums; }
+th { background:var(--surface-alt); font-weight:600; text-align:left; padding:0.6rem 0.8rem; border-bottom:2px solid var(--border); font-size:0.8rem; letter-spacing:0.02em; }
+td { padding:0.55rem 0.8rem; border-bottom:1px solid var(--border); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+code { font-family:'JetBrains Mono',monospace; font-size:0.82em; background:var(--surface-alt); padding:0.1em 0.35em; border-radius:3px; }
+
+.callout { background:var(--surface); border-left:4px solid var(--cyan); padding:1rem 1.2rem; margin:1rem 0; border-radius:0 6px 6px 0; font-size:0.9rem; }
+.callout.warn { border-left-color:var(--amber); }
+.callout.danger { border-left-color:var(--guinda); }
+
+.timeline { position:relative; padding-left:2rem; margin:1.5rem 0; }
+.timeline::before { content:''; position:absolute; left:0.5rem; top:0; bottom:0; width:2px; background:var(--border); }
+.tl-item { position:relative; margin-bottom:1.2rem; }
+.tl-item::before { content:''; position:absolute; left:-1.65rem; top:0.5rem; width:10px; height:10px; border-radius:50%; background:var(--cyan); border:2px solid var(--bg); }
+.tl-item.gold::before { background:var(--amber); }
+.tl-item.winter::before { background:var(--text-dim); }
+.tl-item.deep::before { background:var(--guinda); }
+.tl-year { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--cyan); font-weight:700; }
+.tl-item.gold .tl-year { color:var(--amber); }
+.tl-item.winter .tl-year { color:var(--text-dim); }
+.tl-item.deep .tl-year { color:var(--guinda); }
+.tl-text { font-size:0.88rem; }
+.tl-text strong { font-weight:600; }
+
+.vs-strip { display:grid; grid-template-columns:1fr auto 1fr; gap:0; margin:1.5rem 0; border-radius:6px; overflow:hidden; border:1px solid var(--border); }
+.vs-col { padding:1.2rem; }
+.vs-col:first-child { background:var(--surface); }
+.vs-col:last-child { background:var(--surface-alt); }
+.vs-mid { display:flex; align-items:center; justify-content:center; padding:0 0.8rem; background:var(--border); font-weight:700; font-size:0.8rem; color:var(--text-dim); }
+.vs-col h4 { font-size:0.85rem; font-weight:700; margin-bottom:0.5rem; color:var(--cyan); }
+.vs-col p { font-size:0.85rem; margin-bottom:0.3rem; }
+
+/* Quiz */
+.quiz-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:1.2rem; margin-bottom:0.8rem; }
+.quiz-card h4 { font-size:0.95rem; margin-bottom:0.8rem; }
+.quiz-opts { display:flex; flex-direction:column; gap:0.4rem; }
+.quiz-opt { display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0.8rem; border-radius:4px; border:1px solid var(--border); cursor:pointer; font-size:0.88rem; transition:all 0.15s; }
+.quiz-opt:hover { background:var(--tab-hover); border-color:var(--cyan); }
+.quiz-card[data-answered] .quiz-opt { cursor:default; }
+.quiz-card[data-answered] .quiz-opt:hover { background:transparent; border-color:var(--border); }
+.quiz-card[data-answered] .quiz-opt.correct:hover { background:rgba(58,125,92,0.12); border-color:var(--success); }
+.quiz-card[data-answered] .quiz-opt.wrong:hover { background:rgba(196,91,91,0.12); border-color:var(--error); }
+.quiz-opt .marker { font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:var(--cyan); min-width:1.2rem; }
+.quiz-opt.correct { background:rgba(58,125,92,0.12); border-color:var(--success); }
+.quiz-opt.wrong { background:rgba(196,91,91,0.12); border-color:var(--error); }
+.quiz-feedback { display:none; margin-top:0.6rem; padding:0.6rem 0.8rem; border-radius:4px; font-size:0.85rem; }
+.quiz-feedback.show { display:block; }
+.quiz-feedback.right { background:rgba(58,125,92,0.1); color:var(--success); }
+.quiz-feedback.wrong-fb { background:rgba(196,91,91,0.1); color:var(--error); }
+#quizScore { display:none; text-align:center; font-size:1.3rem; font-weight:700; margin:1.5rem 0; }
+#resetQuizBtn { display:none; margin:0 auto; padding:0.6rem 1.5rem; background:var(--cyan); color:#fff; border:none; border-radius:4px; font-size:0.9rem; font-weight:600; cursor:pointer; }
+
+/* Q&A accordion */
+.qa-item { background:var(--surface); border:1px solid var(--border); border-radius:6px; margin-bottom:0.6rem; overflow:hidden; }
+.qa-q { display:flex; align-items:center; gap:0.8rem; padding:0.9rem 1.2rem; cursor:pointer; font-weight:600; font-size:0.92rem; user-select:none; transition:background 0.15s; }
+.qa-q:hover { background:var(--tab-hover); }
+.qa-num { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--cyan); min-width:1.8rem; }
+.qa-arrow { margin-left:auto; font-size:0.7rem; color:var(--text-dim); transition:transform 0.2s; }
+.qa-item.open .qa-arrow { transform:rotate(180deg); }
+.qa-a { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+.qa-a-inner { padding:0 1.2rem 1rem; font-size:0.88rem; line-height:1.7; color:var(--text-dim); }
+
+footer { text-align:center; padding:1.5rem; font-size:0.75rem; color:var(--text-dim); border-top:1px solid var(--border); }
+
+@media (max-width:640px) {
+  .header { padding:1rem; gap:1rem; }
+  .header-text h1 { font-size:1.2rem; }
+  .content { padding:1.2rem 1rem; }
+  .concept-row { grid-template-columns:1fr; }
+  .vs-strip { grid-template-columns:1fr; }
+  .vs-mid { padding:0.5rem; }
+  .tab-btn { padding:0.7rem 0.8rem; font-size:0.8rem; }
+}
+
+.deep-dive { margin:1rem 0; border:1px solid var(--cyan); border-radius:8px; overflow:hidden; }
+.deep-dive summary { padding:0.75rem 1rem; background:rgba(40,180,231,0.08); cursor:pointer; font-weight:600; font-size:0.95rem; color:var(--cyan); list-style:none; }
+.deep-dive summary::-webkit-details-marker { display:none; }
+.deep-dive summary::before { content:'▶ '; transition:transform 0.2s; display:inline-block; }
+.deep-dive[open] summary::before { transform:rotate(90deg); }
+.deep-dive .deep-content { padding:1rem 1.25rem; background:var(--surface); }
+.deep-dive .deep-content p { margin-bottom:0.75rem; }
+.deep-dive .deep-content .formula { background:var(--surface-alt); padding:0.5rem 1rem; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:0.9rem; margin:0.75rem 0; overflow-x:auto; }
+.deep-dive .deep-content table { margin:0.75rem 0; }
+.deep-dive .deep-content ul, .deep-dive .deep-content ol { margin:0.5rem 0 0.75rem 1.5rem; font-size:0.9rem; }
+.deep-dive .deep-content li { margin-bottom:0.3rem; }
+</style>
+</head>
+<body>
+
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div class="header">
+  <div class="header-brand">
+    <div class="unrc-badge">UNRC</div>
+    <div class="header-text">
+      <h1><span class="bracket">&lt;</span>IA<span class="bracket">/&gt;</span> Bloque C</h1>
+      <div class="header-meta">LCDN4INT10 Inteligencia Artificial &middot; 4o semestre &middot; Prof. Haro</div>
+    </div>
+  </div>
+  <div class="header-team">
+    <span class="team-chip">Stephanie Valencia</span>
+    <span class="team-chip">Edith Reyes</span>
+  </div>
+</div>
+
+<!-- ═══════════ TABS ═══════════ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="decisiones">Teoría de decisiones</button>
+  <button class="tab-btn" data-tab="utilidad">Teoría de la utilidad</button>
+  <button class="tab-btn" data-tab="juegos">Teoría de juegos</button>
+  <button class="tab-btn" data-tab="nash">Estrategias y Nash</button>
+  <button class="tab-btn" data-tab="funcion">Utilidad y optimización</button>
+  <button class="tab-btn" data-tab="defensa">Defensa</button>
+  <button class="tab-btn" data-tab="quiz">Quiz</button>
+</nav>
+
+<!-- ═══════════ TAB 1: TEORÍA DE DECISIONES ═══════════ -->
+<div class="tab-panel active" id="tab-decisiones">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Sección 1</div>
+    <h2>Teoría de decisiones</h2>
+    <p>La teor&iacute;a de decisiones estudia c&oacute;mo elegir la mejor acci&oacute;n entre varias alternativas cuando los resultados dependen de factores que no controlamos. Es la base formal para que un agente racional act&uacute;e de manera &oacute;ptima (Russell &amp; Norvig, 2022, Cap. 16-17).</p>
+
+    <h3>Dos enfoques complementarios</h3>
+    <div class="vs-strip">
+      <div class="vs-col">
+        <h4>Normativa (prescriptiva)</h4>
+        <p><strong>Pregunta:</strong> ¿Cómo debería decidir un agente racional?</p>
+        <p>Define axiomas (completitud, transitividad) y reglas matemáticas para maximizar la utilidad esperada.</p>
+        <p>Base de la IA: los agentes racionales siguen este enfoque.</p>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-col">
+        <h4>Descriptiva (conductual)</h4>
+        <p><strong>Pregunta:</strong> ¿Cómo decide la gente realmente?</p>
+        <p>Estudia sesgos cognitivos: aversión a la pérdida, anclaje, efecto framing (Kahneman y Tversky, 1979).</p>
+        <p>Los humanos no somos racionales; la IA puede (en teoría) serlo.</p>
+      </div>
+    </div>
+
+    <h3>Tres escenarios de decisión</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Bajo certeza</h4>
+        <p>Conocemos el resultado exacto de cada acción. Solo hay que comparar y elegir el mejor.</p>
+        <p><strong>Ejemplo:</strong> elegir el producto más barato en una lista con precios fijos.</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Bajo riesgo</h4>
+        <p>Conocemos los posibles resultados y sus probabilidades. Podemos calcular el valor esperado.</p>
+        <p><strong>Ejemplo:</strong> invertir en acciones donde sabemos la distribución histórica de rendimientos.</p>
+      </div>
+      <div class="concept-card t3">
+        <h4>Bajo incertidumbre</h4>
+        <p>No conocemos las probabilidades de los estados de la naturaleza. Debemos usar criterios conservadores o agresivos.</p>
+        <p><strong>Ejemplo:</strong> un agricultor que no sabe si habrá sequía, lluvia normal o inundación.</p>
+      </div>
+    </div>
+
+    <h3>Matriz de decisión</h3>
+    <p>Herramienta fundamental: filas = acciones posibles, columnas = estados de la naturaleza, celdas = pagos (payoffs).</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Acción \ Estado</th><th>Sequía (s1)</th><th>Normal (s2)</th><th>Lluvia abundante (s3)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Maíz</strong></td><td>$20,000</td><td>$100,000</td><td>$60,000</td></tr>
+        <tr><td><strong>Trigo</strong></td><td>$50,000</td><td>$70,000</td><td>$45,000</td></tr>
+        <tr><td><strong>Sorgo</strong></td><td>$65,000</td><td>$55,000</td><td>$40,000</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Criterios de decisión bajo incertidumbre</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Filosofía</th><th>Cálculo</th><th>Resultado (ejemplo)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Maximin</strong> (Wald)</td><td>Pesimista: maximizar el peor caso</td><td>Para cada acción, tomar el mínimo; elegir el máximo de esos mínimos</td><td>Trigo (min = $45,000)</td></tr>
+        <tr><td><strong>Maximax</strong></td><td>Optimista: maximizar el mejor caso</td><td>Para cada acción, tomar el máximo; elegir el máximo de esos máximos</td><td>Maíz (max = $100,000)</td></tr>
+        <tr><td><strong>Minimax regret</strong> (Savage)</td><td>Minimizar el arrepentimiento</td><td>Construir tabla de regret (diferencia vs el mejor en cada estado); elegir la acción con menor regret máximo</td><td>Trigo (regret max = $30,000)</td></tr>
+        <tr><td><strong>Valor esperado</strong></td><td>Probabilística (requiere probabilidades)</td><td>E[a] = suma de p_i * payoff_i para cada acción</td><td>Depende de las probabilidades asignadas</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Tabla de arrepentimiento (Savage)</h3>
+    <p>Para cada estado, el regret es la diferencia entre el mejor pago posible y el pago de la acción elegida:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Acción \ Estado</th><th>Sequía</th><th>Normal</th><th>Lluvia abundante</th><th>Max regret</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Maíz</strong></td><td>65k - 20k = $45k</td><td>100k - 100k = $0</td><td>60k - 60k = $0</td><td><strong>$45,000</strong></td></tr>
+        <tr><td><strong>Trigo</strong></td><td>65k - 50k = $15k</td><td>100k - 70k = $30k</td><td>60k - 45k = $15k</td><td><strong>$30,000</strong></td></tr>
+        <tr><td><strong>Sorgo</strong></td><td>65k - 65k = $0</td><td>100k - 55k = $45k</td><td>60k - 40k = $20k</td><td><strong>$45,000</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Por minimax regret, la mejor opción es <strong>Trigo</strong> con un arrepentimiento máximo de $30,000.</p>
+
+    <div class="callout">
+      <strong>Cada criterio da una respuesta diferente.</strong> Maximin elige Trigo (conservador), Maximax elige Maíz (arriesgado), Minimax regret elige Trigo (equilibrado). No hay criterio "correcto" universalmente; depende de la actitud frente al riesgo del decisor.
+    </div>
+
+    <h3>Criterio de valor esperado (bajo riesgo)</h3>
+    <p>Si el agricultor estima P(sequía) = 0.3, P(normal) = 0.5, P(lluvia) = 0.2:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Acción</th><th>Cálculo</th><th>Valor esperado</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Maíz</strong></td><td>0.3(20k) + 0.5(100k) + 0.2(60k)</td><td><strong>$68,000</strong></td></tr>
+        <tr><td><strong>Trigo</strong></td><td>0.3(50k) + 0.5(70k) + 0.2(45k)</td><td><strong>$59,000</strong></td></tr>
+        <tr><td><strong>Sorgo</strong></td><td>0.3(65k) + 0.5(55k) + 0.2(40k)</td><td><strong>$55,000</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Con estas probabilidades, el valor esperado favorece al <strong>Maíz</strong> ($68,000). Pero ojo: el valor esperado no captura la aversión al riesgo. Para eso necesitamos la teoría de la utilidad.</p>
+
+    <!-- Deep dives Tab 1 -->
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Criterio de Hurwicz y Laplace</summary>
+    <div class="deep-content">
+      <p>Adem&aacute;s de los 4 criterios de la tabla anterior, existen dos criterios cl&aacute;sicos adicionales que completan el panorama de la toma de decisiones bajo incertidumbre.</p>
+      <h4>Criterio de Hurwicz (&alpha;)</h4>
+      <p>Introduce un <strong>coeficiente de optimismo</strong> &alpha; &isin; [0, 1] que pondera entre el mejor y el peor resultado de cada acci&oacute;n:</p>
+      <div class="formula">H(a) = &alpha; &middot; max(payoffs de a) + (1 - &alpha;) &middot; min(payoffs de a)</div>
+      <ul>
+        <li>Si &alpha; = 1 &rarr; puro optimista (equivale a <strong>maximax</strong>)</li>
+        <li>Si &alpha; = 0 &rarr; puro pesimista (equivale a <strong>maximin</strong>)</li>
+        <li>Valores intermedios (por ejemplo &alpha; = 0.4) reflejan una postura moderada</li>
+      </ul>
+      <p>Se elige la acci&oacute;n con mayor H(a). La ventaja es que el decisor puede calibrar su actitud frente al riesgo con un solo par&aacute;metro.</p>
+
+      <h4>Criterio de Laplace (raz&oacute;n insuficiente)</h4>
+      <p>Basado en el <strong>principio de raz&oacute;n insuficiente</strong>: si no hay informaci&oacute;n que distinga un estado de otro, se asigna <strong>probabilidad uniforme</strong> a todos los estados y se maximiza el valor esperado.</p>
+      <div class="formula">L(a) = (1/n) &middot; &sum; payoffs de a</div>
+      <p>Es razonable <strong>solo cuando genuinamente no hay informaci&oacute;n</strong> que distinga los estados. Si hay alguna evidencia parcial, es mejor usar Bayes o Hurwicz.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Valor de la informaci&oacute;n perfecta (EVPI)</summary>
+    <div class="deep-content">
+      <p>El EVPI responde a la pregunta: <strong>&iquest;cu&aacute;nto pagar&iacute;as por una bola de cristal?</strong> Es decir, &iquest;cu&aacute;nto vale saber con certeza qu&eacute; estado de la naturaleza va a ocurrir antes de decidir?</p>
+      <div class="formula">EVPI = E<sub>&theta;</sub>[max<sub>a</sub> u(a, &theta;)] - max<sub>a</sub> E<sub>&theta;</sub>[u(a, &theta;)]</div>
+      <p>El primer t&eacute;rmino es el valor esperado <strong>con</strong> informaci&oacute;n perfecta (para cada estado, eliges la mejor acci&oacute;n). El segundo es el valor esperado <strong>sin</strong> informaci&oacute;n (eliges la mejor acci&oacute;n promediando sobre estados).</p>
+
+      <h4>Ejemplo trabajado</h4>
+      <p>Decisi&oacute;n de inversi&oacute;n con dos estados: Bueno (p = 0.4) y Malo (p = 0.6).</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Acci&oacute;n</th><th>Bueno (p=0.4)</th><th>Malo (p=0.6)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Invertir</strong></td><td>+80</td><td>-30</td></tr>
+          <tr><td><strong>No invertir</strong></td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Sin informaci&oacute;n:</strong> E[Invertir] = 0.4(80) + 0.6(-30) = 32 - 18 = 14. E[No invertir] = 0. Mejor acci&oacute;n: Invertir (EV = 14).</p>
+      <p><strong>Con informaci&oacute;n perfecta:</strong> Si Bueno &rarr; Invertir (+80). Si Malo &rarr; No invertir (0). EV = 0.4(80) + 0.6(0) = 32.</p>
+      <p><strong>EVPI = 32 - 14 = 18.</strong> No vale la pena pagar m&aacute;s de 18 unidades por un estudio de mercado perfecto.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: 5 criterios comparados &mdash; ejemplo num&eacute;rico completo</summary>
+    <div class="deep-content">
+      <p>Matriz de pagos con 3 acciones y 3 estados:</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Acci&oacute;n</th><th>S1</th><th>S2</th><th>S3</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A</strong></td><td>10</td><td>5</td><td>-2</td></tr>
+          <tr><td><strong>B</strong></td><td>4</td><td>8</td><td>3</td></tr>
+          <tr><td><strong>C</strong></td><td>0</td><td>12</td><td>6</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>1. Maximin (pesimista)</h4>
+      <p>Peor caso: A = -2, B = 3, C = 0. Se elige <strong>B</strong> (mejor peor caso = 3).</p>
+
+      <h4>2. Maximax (optimista)</h4>
+      <p>Mejor caso: A = 10, B = 8, C = 12. Se elige <strong>C</strong> (mejor mejor caso = 12).</p>
+
+      <h4>3. Hurwicz (&alpha; = 0.4)</h4>
+      <div class="formula">H(A) = 0.4(10) + 0.6(-2) = 2.8
+H(B) = 0.4(8) + 0.6(3) = 5.0
+H(C) = 0.4(12) + 0.6(0) = 4.8</div>
+      <p>Se elige <strong>B</strong> (H = 5.0).</p>
+
+      <h4>4. Laplace (probabilidad uniforme 1/3)</h4>
+      <div class="formula">L(A) = (10 + 5 + (-2)) / 3 = 4.33
+L(B) = (4 + 8 + 3) / 3 = 5.00
+L(C) = (0 + 12 + 6) / 3 = 6.00</div>
+      <p>Se elige <strong>C</strong> (L = 6.00).</p>
+
+      <h4>5. Minimax regret (Savage)</h4>
+      <p>Mejor por estado: S1 = 10, S2 = 12, S3 = 6. Tabla de arrepentimiento:</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Acci&oacute;n</th><th>S1</th><th>S2</th><th>S3</th><th>Max regret</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A</strong></td><td>0</td><td>7</td><td>8</td><td><strong>8</strong></td></tr>
+          <tr><td><strong>B</strong></td><td>6</td><td>4</td><td>3</td><td><strong>6</strong></td></tr>
+          <tr><td><strong>C</strong></td><td>10</td><td>0</td><td>0</td><td><strong>10</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Se elige <strong>B</strong> (menor arrepentimiento m&aacute;ximo = 6).</p>
+
+      <div class="callout">
+        <strong>Conclusi&oacute;n:</strong> B es la opci&oacute;n robusta (gana en maximin, Hurwicz y regret). C es la opci&oacute;n optimista (gana en maximax y Laplace). A no gana en ning&uacute;n criterio. Esto ilustra que la elecci&oacute;n depende de la <strong>actitud frente al riesgo</strong> del decisor.
+      </div>
+    </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 2: TEORÍA DE LA UTILIDAD ═══════════ -->
+<div class="tab-panel" id="tab-utilidad">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Sección 2</div>
+    <h2>Teoría de la utilidad</h2>
+    <p>La utilidad es una medida numérica de la preferencia o satisfacción que un agente obtiene de un resultado. No es lo mismo que el valor monetario: $1,000 extra importan mucho más a alguien con $100 que a alguien con $1,000,000.</p>
+
+    <h3>Tipos de utilidad</h3>
+    <div class="vs-strip">
+      <div class="vs-col">
+        <h4>Utilidad ordinal</h4>
+        <p>Solo permite <strong>ordenar</strong> preferencias: A > B > C.</p>
+        <p>No dice cuánto más se prefiere A sobre B.</p>
+        <p><strong>Ejemplo:</strong> "prefiero pizza sobre tacos, y tacos sobre ensalada" (sin magnitud).</p>
+        <p>Suficiente para decisiones bajo certeza.</p>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-col">
+        <h4>Utilidad cardinal</h4>
+        <p>Asigna números con <strong>magnitud significativa</strong>: u(A) = 10, u(B) = 6, u(C) = 2.</p>
+        <p>Permite decir que A se prefiere sobre B el doble que B sobre C.</p>
+        <p><strong>Ejemplo:</strong> u(pizza) = 10, u(tacos) = 6, u(ensalada) = 2.</p>
+        <p>Necesaria para decisiones bajo riesgo (utilidad esperada).</p>
+      </div>
+    </div>
+
+    <h3>Utilidad esperada (von Neumann-Morgenstern)</h3>
+    <p>La piedra angular de la teoría de decisiones racionales. Una lotería L con resultados x1, x2, ..., xn y probabilidades p1, p2, ..., pn tiene utilidad esperada:</p>
+    <div class="callout">
+      <strong>U(L) = p1 * u(x1) + p2 * u(x2) + ... + pn * u(xn)</strong><br>
+      El agente racional elige la acción que maximiza U(L).
+    </div>
+
+    <h3>Propiedades de una función de utilidad racional</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Propiedad</th><th>Significado</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Completitud</strong></td><td>Para cualquier par A, B: el agente prefiere A, prefiere B, o es indiferente</td><td>No existe "no sé si prefiero café o té"</td></tr>
+        <tr><td><strong>Transitividad</strong></td><td>Si A > B y B > C, entonces A > C</td><td>Si prefiero pizza a tacos y tacos a ensalada, debo preferir pizza a ensalada</td></tr>
+        <tr><td><strong>Continuidad</strong></td><td>Si A > B > C, existe alguna lotería mixta entre A y C que es equivalente a B</td><td>Hay alguna probabilidad p donde [p: pizza, (1-p): ensalada] equivale a tacos</td></tr>
+        <tr><td><strong>Independencia</strong></td><td>Si A > B, entonces [p: A, (1-p): C] > [p: B, (1-p): C] para todo C y p</td><td>Mezclar la misma lotería con ambas no cambia la preferencia</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Actitudes frente al riesgo</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Averso al riesgo</h4>
+        <p>Función de utilidad <strong>cóncava</strong> (por ejemplo, u(x) = sqrt(x)).</p>
+        <p>Prefiere un pago seguro al valor esperado de una lotería.</p>
+        <p><strong>Ejemplo:</strong> prefiere $50,000 seguros que 50% de ganar $100,000 o nada.</p>
+        <p>La mayoría de las personas son aversas al riesgo con ganancias grandes.</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Neutral al riesgo</h4>
+        <p>Función de utilidad <strong>lineal</strong> (u(x) = x).</p>
+        <p>Le da igual el pago seguro que la lotería con el mismo valor esperado.</p>
+        <p><strong>Ejemplo:</strong> indiferente entre $50k seguros y 50% chance de $100k.</p>
+        <p>Maximizar valor esperado = maximizar utilidad esperada.</p>
+      </div>
+      <div class="concept-card t3">
+        <h4>Buscador de riesgo</h4>
+        <p>Función de utilidad <strong>convexa</strong> (por ejemplo, u(x) = x^2).</p>
+        <p>Prefiere la lotería al pago seguro equivalente.</p>
+        <p><strong>Ejemplo:</strong> prefiere 50% de $100k que $50k seguros.</p>
+        <p>Comportamiento típico con pérdidas pequeñas (comprar lotería).</p>
+      </div>
+    </div>
+
+    <h3>La Paradoja de San Petersburgo</h3>
+    <div class="callout danger">
+      <strong>El problema:</strong> Un casino lanza una moneda repetidamente. Si sale cara en el lanzamiento n, paga 2^n pesos. El valor esperado de este juego es infinito: E = 1/2(2) + 1/4(4) + 1/8(8) + ... = 1 + 1 + 1 + ... = infinito. Pero nadie pagaría una cantidad infinita (ni siquiera $1,000) por jugar.
+    </div>
+    <p><strong>La solución de Bernoulli (1738):</strong> las personas no maximizan el valor monetario esperado sino la <strong>utilidad esperada</strong>. Con u(x) = ln(x), la utilidad esperada del juego converge a un valor finito. Esta idea dio origen a toda la teoría de utilidad moderna.</p>
+
+    <h3>Ejemplo: decisión de seguro</h3>
+    <p>Una persona aversa al riesgo con u(x) = sqrt(x) y patrimonio de $100,000 enfrenta un 1% de probabilidad de perder $100,000:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Opción</th><th>Cálculo</th><th>Utilidad esperada</th></tr></thead>
+      <tbody>
+        <tr><td><strong>No asegurarse</strong></td><td>0.99 * sqrt(100,000) + 0.01 * sqrt(0)</td><td>0.99 * 316.23 + 0.01 * 0 = <strong>313.07</strong></td></tr>
+        <tr><td><strong>Pagar prima $1,500</strong></td><td>1.0 * sqrt(98,500)</td><td>1.0 * 313.87 = <strong>313.87</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>La utilidad esperada con seguro (313.87) es mayor que sin seguro (313.07), aunque el valor esperado de no asegurarse ($99,000) es mayor que con seguro ($98,500). La persona racional y aversa al riesgo se asegura.</p>
+
+    <!-- Deep dives Tab 2 -->
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Construcci&oacute;n expl&iacute;cita de la funci&oacute;n de utilidad VNM</summary>
+    <div class="deep-content">
+      <p>El teorema de von Neumann-Morgenstern (1944) no solo dice que la utilidad esperada funciona: da un <strong>m&eacute;todo constructivo</strong> para obtener la funci&oacute;n de utilidad de cualquier agente racional.</p>
+
+      <h4>Procedimiento paso a paso</h4>
+      <ol>
+        <li><strong>Paso 1:</strong> Ordenar los resultados extremos. Sea A<sub>1</sub> el peor resultado y A<sub>n</sub> el mejor.</li>
+        <li><strong>Paso 2:</strong> Fijar la escala. Asignar u(A<sub>1</sub>) = 0 y u(A<sub>n</sub>) = 1.</li>
+        <li><strong>Paso 3:</strong> Para cada resultado intermedio A<sub>i</sub>, el axioma de continuidad garantiza que existe un &uacute;nico &alpha;<sub>i</sub> &isin; [0, 1] tal que:
+          <div class="formula">A<sub>i</sub> ~ &alpha;<sub>i</sub> &middot; A<sub>n</sub> + (1 - &alpha;<sub>i</sub>) &middot; A<sub>1</sub></div>
+          Es decir, el agente es indiferente entre recibir A<sub>i</sub> con certeza y una loter&iacute;a con probabilidad &alpha;<sub>i</sub> de obtener el mejor resultado. Se define u(A<sub>i</sub>) = &alpha;<sub>i</sub>.
+        </li>
+        <li><strong>Paso 4:</strong> Para cualquier loter&iacute;a L = &sum; p<sub>i</sub> &middot; A<sub>i</sub>, la utilidad esperada es:
+          <div class="formula">EU(L) = &sum; p<sub>i</sub> &middot; u(A<sub>i</sub>)</div>
+        </li>
+      </ol>
+
+      <h4>Unicidad</h4>
+      <p>La funci&oacute;n de utilidad es &uacute;nica <strong>salvo transformaciones afines positivas</strong>:</p>
+      <div class="formula">u'(x) = a &middot; u(x) + b, donde a &gt; 0</div>
+      <p>Esto significa que la escala y el origen son arbitrarios (como grados Celsius vs Fahrenheit), pero el <strong>ordenamiento de las loter&iacute;as se preserva</strong>.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Paradoja de Allais (viola independencia)</summary>
+    <div class="deep-content">
+      <p>Maurice Allais (1953) demostr&oacute; experimentalmente que la mayor&iacute;a de las personas violan el axioma de independencia de forma sistem&aacute;tica.</p>
+
+      <h4>Elecci&oacute;n 1</h4>
+      <ul>
+        <li><strong>A:</strong> $1 mill&oacute;n seguro</li>
+        <li><strong>B:</strong> $5M con prob 0.10, $1M con prob 0.89, $0 con prob 0.01</li>
+      </ul>
+      <p>La mayor&iacute;a elige <strong>A</strong> (prefieren lo seguro).</p>
+
+      <h4>Elecci&oacute;n 2</h4>
+      <ul>
+        <li><strong>C:</strong> $1M con prob 0.11, $0 con prob 0.89</li>
+        <li><strong>D:</strong> $5M con prob 0.10, $0 con prob 0.90</li>
+      </ul>
+      <p>La mayor&iacute;a elige <strong>D</strong> (ya que ambas son arriesgadas, van por el premio mayor).</p>
+
+      <h4>&iquest;Por qu&eacute; viola la utilidad esperada?</h4>
+      <p>Si A &succ; B, por EU se cumple que u(1M) &gt; 0.10 &middot; u(5M) + 0.89 &middot; u(1M) + 0.01 &middot; u(0). Simplificando (restando el componente com&uacute;n de 0.89), esto implica que deber&iacute;a preferirse C sobre D. Pero la gente elige A <em>y</em> D, lo cual es inconsistente con EU.</p>
+      <p>Este fen&oacute;meno se llama <strong>efecto de certeza</strong>: las personas sobrevaloran los resultados seguros frente a los probables.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Paradoja de Ellsberg (viola probabilidad subjetiva)</summary>
+    <div class="deep-content">
+      <p>Daniel Ellsberg (1961) mostr&oacute; que las personas tienen <strong>aversi&oacute;n a la ambig&uuml;edad</strong>, no solo al riesgo.</p>
+
+      <h4>El experimento</h4>
+      <p>Una urna contiene 90 bolas: 30 rojas y 60 que son negras o amarillas en proporci&oacute;n desconocida.</p>
+      <ul>
+        <li><strong>Apuesta I:</strong> La mayor&iacute;a prefiere apostar a &ldquo;roja&rdquo; (prob conocida = 1/3) sobre &ldquo;negra&rdquo; (prob desconocida)</li>
+        <li><strong>Apuesta II:</strong> La mayor&iacute;a prefiere apostar a &ldquo;no roja&rdquo; (prob conocida = 2/3) sobre &ldquo;no negra&rdquo; (prob desconocida)</li>
+      </ul>
+
+      <h4>&iquest;Por qu&eacute; es problem&aacute;tico?</h4>
+      <p>Si prefieres roja &gt; negra, est&aacute;s diciendo que P(roja) &gt; P(negra). Pero si tambi&eacute;n prefieres no-roja &gt; no-negra, est&aacute;s diciendo P(no roja) &gt; P(no negra), o sea P(roja) &lt; P(negra). <strong>Contradicci&oacute;n.</strong></p>
+      <p>No existe <em>ninguna</em> distribuci&oacute;n de probabilidad subjetiva que represente ambas preferencias. La gente prefiere riesgos con probabilidades conocidas sobre riesgos ambiguos, independientemente de la magnitud. Esta aversi&oacute;n a la ambig&uuml;edad motiv&oacute; modelos alternativos como <strong>maximin expected utility</strong> (Gilboa &amp; Schmeidler, 1989).</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Prospect Theory (Kahneman &amp; Tversky, 1979)</summary>
+    <div class="deep-content">
+      <p>Prospect Theory es la alternativa descriptiva m&aacute;s exitosa a la utilidad esperada. Gan&oacute; el Nobel de Econom&iacute;a en 2002.</p>
+
+      <h4>Tres innovaciones clave</h4>
+      <ol>
+        <li><strong>Punto de referencia:</strong> el valor se eval&uacute;a relativo a un punto de referencia (generalmente el status quo), no sobre la riqueza final. Las personas piensan en <em>ganancias y p&eacute;rdidas</em>, no en estados finales.</li>
+        <li><strong>Funci&oacute;n de valor en S:</strong>
+          <ul>
+            <li><em>C&oacute;ncava</em> para ganancias (aversi&oacute;n al riesgo con ganancias)</li>
+            <li><em>Convexa</em> para p&eacute;rdidas (b&uacute;squeda de riesgo con p&eacute;rdidas)</li>
+            <li>M&aacute;s empinada para p&eacute;rdidas: <strong>aversi&oacute;n a la p&eacute;rdida</strong> con &lambda; &asymp; 2.25 (perder $100 duele ~2.25 veces m&aacute;s de lo que agrada ganar $100)</li>
+          </ul>
+        </li>
+        <li><strong>Ponderaci&oacute;n de probabilidades &pi;(p):</strong>
+          <ul>
+            <li>Sobrepondera probabilidades peque&ntilde;as (explica por qu&eacute; compramos loter&iacute;a y seguros)</li>
+            <li>Subpondera probabilidades moderadas y altas</li>
+          </ul>
+        </li>
+      </ol>
+
+      <h4>&iquest;Qu&eacute; explica que EU no puede?</h4>
+      <ul>
+        <li>La <strong>paradoja de Allais</strong> (efecto de certeza)</li>
+        <li>El <strong>efecto framing</strong>: la misma situaci&oacute;n descrita como ganancia o p&eacute;rdida produce decisiones opuestas</li>
+        <li>La compra simult&aacute;nea de seguros (aversi&oacute;n al riesgo) y loter&iacute;a (b&uacute;squeda de riesgo)</li>
+      </ul>
+      <p><em>Fuente: Kahneman, D. &amp; Tversky, A. (1979). Prospect Theory: An Analysis of Decision under Risk. Econometrica, 47(2), 263-291.</em></p>
+    </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 3: TEORÍA DE JUEGOS ═══════════ -->
+<div class="tab-panel" id="tab-juegos">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Sección 3</div>
+    <h2>Teoría de juegos</h2>
+    <p>La teoría de juegos estudia la interacción estratégica entre agentes racionales. A diferencia de la teoría de decisiones (donde la naturaleza es pasiva), aquí el resultado de tu acción depende de lo que hagan los demás jugadores.</p>
+
+    <h3>Componentes de un juego</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Jugadores</h4>
+        <p>Los agentes que toman decisiones. Mínimo 2. Cada uno busca maximizar su propia utilidad.</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Estrategias</h4>
+        <p>El conjunto de acciones disponibles para cada jugador. Una estrategia es un plan completo de acción.</p>
+      </div>
+      <div class="concept-card t3">
+        <h4>Pagos (payoffs)</h4>
+        <p>La utilidad que recibe cada jugador dado el perfil de estrategias elegido por todos.</p>
+      </div>
+      <div class="concept-card t4">
+        <h4>Información</h4>
+        <p>Qué sabe cada jugador: las reglas, las acciones disponibles, los pagos, y lo que han hecho los demás.</p>
+      </div>
+    </div>
+
+    <h3>Representaciones</h3>
+    <div class="vs-strip">
+      <div class="vs-col">
+        <h4>Forma normal (matriz)</h4>
+        <p>Una tabla con los pagos de cada combinación de estrategias.</p>
+        <p>Ideal para juegos <strong>simultáneos</strong>.</p>
+        <p>Cada celda muestra (pago J1, pago J2).</p>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-col">
+        <h4>Forma extensiva (árbol)</h4>
+        <p>Un árbol de decisión con nodos (decisiones o azar) y ramas (acciones).</p>
+        <p>Ideal para juegos <strong>secuenciales</strong>.</p>
+        <p>Muestra el orden de las jugadas y la información disponible en cada punto.</p>
+      </div>
+    </div>
+
+    <h3>Clasificación de juegos</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Tipo A</th><th>Tipo B</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cooperación</strong></td><td><strong>Cooperativo:</strong> los jugadores pueden formar acuerdos vinculantes</td><td><strong>No cooperativo:</strong> cada quien decide por su cuenta (más estudiado)</td></tr>
+        <tr><td><strong>Suma de pagos</strong></td><td><strong>Suma cero:</strong> lo que uno gana, el otro lo pierde (ajedrez, póker)</td><td><strong>Suma no cero:</strong> ambos pueden ganar o perder (la mayoría de situaciones reales)</td></tr>
+        <tr><td><strong>Temporalidad</strong></td><td><strong>Simultáneo:</strong> los jugadores eligen al mismo tiempo (piedra/papel/tijera)</td><td><strong>Secuencial:</strong> uno elige primero y el otro observa (ajedrez)</td></tr>
+        <tr><td><strong>Información</strong></td><td><strong>Perfecta:</strong> todos saben todo lo que ha pasado (ajedrez)</td><td><strong>Imperfecta:</strong> hay información oculta (póker, subastas)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>El Dilema del Prisionero</h3>
+    <p>El juego más famoso de la teoría de juegos. Dos sospechosos son interrogados por separado y deben decidir si cooperar (callar) o traicionar (confesar).</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>B coopera (calla)</th><th>B traiciona (confiesa)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A coopera (calla)</strong></td><td>(-1, -1) ambos 1 año</td><td>(-3, 0) A: 3 años, B: libre</td></tr>
+        <tr><td><strong>A traiciona (confiesa)</strong></td><td>(0, -3) A: libre, B: 3 años</td><td>(-2, -2) ambos 2 años</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout warn">
+      <strong>La tragedia:</strong> Traicionar es estrategia dominante para ambos (siempre es mejor confesar sin importar qué haga el otro). El resultado (Traicionar, Traicionar) = (-2, -2) es un equilibrio de Nash, pero es Pareto-inferior a (Cooperar, Cooperar) = (-1, -1). La racionalidad individual lleva a un resultado colectivamente peor.
+    </div>
+
+    <h3>Otros juegos clásicos</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Batalla de los sexos</h4>
+        <p>Dos personas quieren ir juntas a un evento pero prefieren eventos diferentes. Tiene 2 equilibrios de Nash puros y 1 mixto.</p>
+        <p><strong>Dilema:</strong> coordinarse sin comunicación.</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Juego del gallina (Chicken)</h4>
+        <p>Dos conductores van de frente; el primero que gira pierde prestigio, pero si ninguno gira, ambos chocan.</p>
+        <p><strong>Dilema:</strong> ceder o arriesgarse al desastre.</p>
+      </div>
+      <div class="concept-card t3">
+        <h4>Caza del ciervo (Stag Hunt)</h4>
+        <p>Dos cazadores eligen cazar un ciervo juntos (alto pago, requiere cooperación) o una liebre solos (bajo pago, seguro).</p>
+        <p><strong>Dilema:</strong> confiar en que el otro cooperará.</p>
+      </div>
+    </div>
+
+    <!-- Deep dives Tab 3 -->
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Demostraci&oacute;n intuitiva del teorema de Nash (1950)</summary>
+    <div class="deep-content">
+      <p>John Nash demostr&oacute; que <strong>todo juego finito tiene al menos un equilibrio de Nash</strong> (posiblemente en estrategias mixtas). La demostraci&oacute;n usa el teorema de punto fijo de Kakutani.</p>
+
+      <h4>Esquema de la prueba</h4>
+      <ol>
+        <li><strong>Espacio de estrategias:</strong> Sea &Sigma; el conjunto de perfiles de estrategias mixtas (cada jugador elige una distribuci&oacute;n de probabilidad sobre sus acciones). &Sigma; es un producto de s&iacute;mplices: <em>compacto, convexo y no vac&iacute;o</em>.</li>
+        <li><strong>Correspondencia de mejor respuesta:</strong> Para cada perfil &sigma;, definimos BR(&sigma;) como el conjunto de perfiles donde cada jugador juega una mejor respuesta a lo que hacen los dem&aacute;s.</li>
+        <li><strong>Propiedades de BR:</strong> BR(&sigma;) es no vac&iacute;o (siempre hay al menos una mejor respuesta), convexo (cualquier mezcla de mejores respuestas tambi&eacute;n es mejor respuesta) y tiene grafo cerrado.</li>
+        <li><strong>Punto fijo:</strong> Por el teorema de Kakutani, existe &sigma;* &isin; BR(&sigma;*). Es decir, existe un perfil donde <em>cada jugador ya est&aacute; jugando su mejor respuesta</em> a lo que hacen los dem&aacute;s.</li>
+      </ol>
+
+      <h4>Intuici&oacute;n</h4>
+      <p>&ldquo;Si todos juegan una mejor respuesta a lo que creen que hacen los dem&aacute;s, y esas creencias son consistentes con lo que realmente hacen, tenemos un equilibrio.&rdquo; El teorema garantiza que ese punto de consistencia siempre existe.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Equilibrio correlacionado de Aumann</summary>
+    <div class="deep-content">
+      <p>Robert Aumann (Nobel 2005) generaliz&oacute; el concepto de Nash con el <strong>equilibrio correlacionado</strong>: una distribuci&oacute;n de probabilidad conjunta sobre perfiles de acci&oacute;n que no necesariamente es producto de distribuciones independientes.</p>
+
+      <h4>&iquest;C&oacute;mo funciona?</h4>
+      <ol>
+        <li>Un <strong>mediador</strong> extrae un perfil de acciones de una distribuci&oacute;n conjunta y le recomienda a cada jugador su acci&oacute;n (en privado).</li>
+        <li>Ning&uacute;n jugador tiene incentivo para desviarse de la recomendaci&oacute;n, <em>dado lo que le recomendaron</em>.</li>
+      </ol>
+
+      <h4>Ventaja sobre Nash</h4>
+      <p>Puede lograr pagos <strong>fuera del casco convexo</strong> de los equilibrios de Nash, es decir, resultados que ninguna mezcla de equilibrios de Nash alcanza.</p>
+
+      <h4>Ejemplo: sem&aacute;foro en el juego del Gallina</h4>
+      <p>En el juego del Gallina, ambos conductores se acercan de frente. El sem&aacute;foro act&uacute;a como mediador: asigna aleatoriamente (Parar, Pasar) o (Pasar, Parar) con prob 1/2 cada uno. Nadie tiene incentivo a desviarse de la recomendaci&oacute;n del sem&aacute;foro, y el pago esperado es mejor que el equilibrio mixto de Nash.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Juegos repetidos y cooperaci&oacute;n</summary>
+    <div class="deep-content">
+      <p>En el Dilema del Prisionero de una sola ronda, la traici&oacute;n es inevitable. Pero cuando el juego se <strong>repite infinitamente</strong> (o con horizonte incierto), la cooperaci&oacute;n puede sostenerse.</p>
+
+      <h4>Factor de descuento &delta;</h4>
+      <p>&delta; &isin; [0, 1) representa cu&aacute;nto valora el jugador las rondas futuras. Si &delta; es cercano a 1, el futuro importa mucho y la cooperaci&oacute;n es m&aacute;s f&aacute;cil de sostener.</p>
+
+      <h4>Tit-for-Tat (Axelrod, 1984)</h4>
+      <p>La estrategia ganadora en los torneos de Axelrod es sorprendentemente simple:</p>
+      <ul>
+        <li><strong>Amable:</strong> empieza cooperando</li>
+        <li><strong>Represalia:</strong> si el otro traiciona, traiciona en la siguiente ronda</li>
+        <li><strong>Perd&oacute;n:</strong> si el otro vuelve a cooperar, coopera de nuevo</li>
+      </ul>
+
+      <h4>Teorema Folk</h4>
+      <p>Cualquier vector de pagos que sea <strong>factible</strong> (alcanzable por alguna combinaci&oacute;n de acciones) e <strong>individualmente racional</strong> (cada jugador obtiene al menos lo que podr&iacute;a garantizarse solo) puede sostenerse como equilibrio de Nash si &delta; es suficientemente alto.</p>
+      <p>Esto significa que la cooperaci&oacute;n, y muchos otros resultados, son posibles cuando las relaciones son de largo plazo.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Juegos bayesianos (informaci&oacute;n incompleta)</summary>
+    <div class="deep-content">
+      <p>John Harsanyi (Nobel 1994) formaliz&oacute; los juegos donde los jugadores tienen <strong>informaci&oacute;n privada</strong> (tipos).</p>
+
+      <h4>Componentes</h4>
+      <ul>
+        <li><strong>Tipo privado:</strong> cada jugador tiene un tipo &theta;<sub>i</sub> que determina sus pagos (por ejemplo, su valoraci&oacute;n real de un bien en una subasta)</li>
+        <li><strong>Prior com&uacute;n:</strong> todos comparten una distribuci&oacute;n de probabilidad sobre los tipos (pero cada uno solo conoce el suyo)</li>
+        <li><strong>Estrategia:</strong> una funci&oacute;n que mapea el propio tipo a una acci&oacute;n: s<sub>i</sub>(&theta;<sub>i</sub>) &rarr; a<sub>i</sub></li>
+      </ul>
+
+      <h4>Equilibrio bayesiano de Nash</h4>
+      <p>Un perfil de estrategias donde <strong>cada tipo de cada jugador</strong> maximiza su utilidad esperada, dadas sus creencias actualizadas sobre los tipos de los dem&aacute;s.</p>
+      <p>Aplicaciones: subastas (cada postor tiene una valoraci&oacute;n privada), negociaciones (cada parte conoce su costo/beneficio real pero no el del otro), mercados con informaci&oacute;n asim&eacute;trica.</p>
+      <p><em>Fuente: Harsanyi, J. (1967-68). Games with Incomplete Information Played by Bayesian Players. Management Science.</em></p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Juegos evolutivos y conexi&oacute;n con AG (Bloque B)</summary>
+    <div class="deep-content">
+      <p>En lugar de asumir racionalidad perfecta, los <strong>juegos evolutivos</strong> estudian poblaciones de estrategias que se reproducen seg&uacute;n su &eacute;xito relativo.</p>
+
+      <h4>Din&aacute;mica del replicador</h4>
+      <p>Las estrategias m&aacute;s exitosas (mayor pago promedio contra la poblaci&oacute;n) crecen en frecuencia; las menos exitosas desaparecen. Es el equivalente biol&oacute;gico de la selecci&oacute;n natural aplicado a estrategias.</p>
+
+      <h4>ESS (Estrategia Evolutivamente Estable)</h4>
+      <p>Concepto de Maynard Smith (1982): una estrategia es ESS si, cuando es adoptada por casi toda la poblaci&oacute;n, <strong>no puede ser invadida</strong> por un mutante raro que juega diferente.</p>
+      <ul>
+        <li>Todo ESS es un equilibrio de Nash (sim&eacute;trico), pero no todo Nash es ESS</li>
+        <li>ESS requiere estabilidad ante perturbaciones, no solo ante desviaciones unilaterales</li>
+      </ul>
+
+      <h4>Conexi&oacute;n con algoritmos gen&eacute;ticos (Bloque B)</h4>
+      <p>Los AG son una <strong>implementaci&oacute;n computacional de la din&aacute;mica evolutiva</strong>:</p>
+      <ul>
+        <li><strong>Selecci&oacute;n:</strong> las soluciones con mayor fitness se reproducen m&aacute;s (como las estrategias exitosas en el replicador)</li>
+        <li><strong>Cruce y mutaci&oacute;n:</strong> introducen variaci&oacute;n (como los mutantes en juegos evolutivos)</li>
+        <li><strong>Convergencia:</strong> la poblaci&oacute;n tiende a concentrarse en soluciones de alta calidad (como la din&aacute;mica del replicador converge a ESS)</li>
+      </ul>
+      <p>As&iacute;, los conceptos de Bloque B (AG) y Bloque C (juegos) est&aacute;n conectados por la <strong>teor&iacute;a de la evoluci&oacute;n</strong> como marco unificador.</p>
+    </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 4: ESTRATEGIAS Y NASH ═══════════ -->
+<div class="tab-panel" id="tab-nash">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Sección 4</div>
+    <h2>Estrategias y equilibrio de Nash</h2>
+
+    <h3>Estrategia dominante y dominada</h3>
+    <div class="vs-strip">
+      <div class="vs-col">
+        <h4>Estrategia dominante</h4>
+        <p>Una estrategia que da <strong>mejor pago que cualquier otra</strong>, sin importar lo que haga el oponente.</p>
+        <p>Si existe, un jugador racional siempre la elige.</p>
+        <p><strong>Ejemplo:</strong> en el Dilema del Prisionero, Traicionar domina a Cooperar para ambos jugadores.</p>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-col">
+        <h4>Estrategia dominada</h4>
+        <p>Una estrategia que <strong>siempre da peor resultado</strong> que alguna otra, sin importar las acciones del rival.</p>
+        <p>Un jugador racional nunca la elige; se puede eliminar del análisis.</p>
+        <p><strong>Ejemplo:</strong> en el Dilema del Prisionero, Cooperar está dominada por Traicionar.</p>
+      </div>
+    </div>
+
+    <h3>Eliminación iterada de estrategias dominadas (IEDS)</h3>
+    <p>Método para simplificar un juego eliminando las estrategias que ningún jugador racional elegiría:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Paso</th><th>Acción</th><th>Razonamiento</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Buscar estrategias estrictamente dominadas para algún jugador</td><td>Si una fila/columna siempre da menos pago que otra, se elimina</td></tr>
+        <tr><td>2</td><td>Eliminarla de la matriz</td><td>Ningún jugador racional la elegiría</td></tr>
+        <tr><td>3</td><td>Repetir en la matriz reducida</td><td>Al eliminar una, otras pueden quedar dominadas</td></tr>
+        <tr><td>4</td><td>Continuar hasta que no queden más dominadas</td><td>Lo que queda son las estrategias "racionalizables"</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Equilibrio de Nash</h3>
+    <div class="callout">
+      <strong>Definición:</strong> Un perfil de estrategias es un equilibrio de Nash si <strong>ningún jugador puede mejorar su pago cambiando unilateralmente</strong> su estrategia, dado que los demás mantienen las suyas. Fue formalizado por John Nash en 1950.
+    </div>
+
+    <h3>Dos tipos de equilibrio</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Estrategia pura</h4>
+        <p>Cada jugador elige una acción específica con certeza.</p>
+        <p><strong>Ejemplo:</strong> en el Dilema del Prisionero, (Traicionar, Traicionar) es el único equilibrio de Nash en estrategias puras.</p>
+        <p>No todos los juegos tienen equilibrio en puras (por ejemplo, piedra/papel/tijera).</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Estrategia mixta</h4>
+        <p>Cada jugador asigna una distribución de probabilidad sobre sus acciones.</p>
+        <p><strong>Ejemplo:</strong> en piedra/papel/tijera, el equilibrio mixto es jugar cada opción con probabilidad 1/3.</p>
+        <p><strong>Teorema de Nash (1950):</strong> todo juego finito tiene al menos un equilibrio de Nash (posiblemente mixto).</p>
+      </div>
+    </div>
+
+    <h3>Cómo encontrar equilibrios de Nash: método de mejor respuesta</h3>
+    <p>Para un juego 2x2, se subraya el mejor pago de cada jugador dado lo que elige el otro:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>B: Izquierda</th><th>B: Derecha</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A: Arriba</strong></td><td>(3*, 2*)</td><td>(1, 1)</td></tr>
+        <tr><td><strong>A: Abajo</strong></td><td>(2, 1)</td><td>(2*, 3*)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>* = mejor respuesta. Las celdas donde <strong>ambos</strong> pagos están subrayados son equilibrios de Nash. Aquí hay dos: (Arriba, Izquierda) y (Abajo, Derecha).</p>
+
+    <h3>Nash vs Pareto</h3>
+    <div class="callout danger">
+      <strong>Un equilibrio de Nash puede ser Pareto-ineficiente.</strong> En el Dilema del Prisionero, (Traicionar, Traicionar) da (-2, -2), pero (Cooperar, Cooperar) da (-1, -1) que es mejor para ambos. El equilibrio de Nash NO garantiza el mejor resultado colectivo; solo garantiza que nadie tiene incentivo para desviarse unilateralmente.
+    </div>
+
+    <h3>Buscador de Nash en Python (juego 2x2)</h3>
+    <div class="code-block"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">find_pure_nash</span>(A, B):
+    <span class="str">"""A[i][j] = pago jugador 1, B[i][j] = pago jugador 2."""</span>
+    equilibria = []
+    rows, cols = A.shape
+    <span class="kw">for</span> i <span class="kw">in</span> range(rows):
+        <span class="kw">for</span> j <span class="kw">in</span> range(cols):
+            <span class="cmt"># Mejor respuesta de J1 dado que J2 juega j</span>
+            best_row = A[:, j].max() == A[i, j]
+            <span class="cmt"># Mejor respuesta de J2 dado que J1 juega i</span>
+            best_col = B[i, :].max() == B[i, j]
+            <span class="kw">if</span> best_row <span class="kw">and</span> best_col:
+                equilibria.append((i, j))
+    <span class="kw">return</span> equilibria
+
+<span class="cmt"># Dilema del Prisionero</span>
+A = np.array([[-<span class="str">1</span>, -<span class="str">3</span>],
+              [ <span class="str">0</span>, -<span class="str">2</span>]])  <span class="cmt"># pagos de J1</span>
+B = np.array([[-<span class="str">1</span>,  <span class="str">0</span>],
+              [-<span class="str">3</span>, -<span class="str">2</span>]])  <span class="cmt"># pagos de J2</span>
+
+<span class="fn">print</span>(find_pure_nash(A, B))
+<span class="cmt"># [(1, 1)]  -> (Traicionar, Traicionar)</span></div>
+
+    <div class="callout">
+      <strong>Para estrategias mixtas en 2x2:</strong> cada jugador elige su probabilidad de modo que el oponente sea indiferente entre sus opciones. Si J1 mezcla con probabilidad p, se resuelve: p * pago(J2, col1) + (1-p) * pago(J2, col2) igualando ambas filas. Es un sistema de ecuaciones lineales.
+    </div>
+
+    <!-- Deep dives Tab 4 -->
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Dise&ntilde;o de mecanismos y subastas</summary>
+    <div class="deep-content">
+      <p>El <strong>dise&ntilde;o de mecanismos</strong> es la &ldquo;ingenier&iacute;a inversa&rdquo; de la teor&iacute;a de juegos: en vez de analizar un juego dado, el dise&ntilde;ador <strong>elige las reglas</strong> del juego para implementar un objetivo social.</p>
+
+      <h4>Principio de revelaci&oacute;n (Myerson, 1979)</h4>
+      <p>Si un resultado puede implementarse por <em>cualquier</em> mecanismo, entonces tambi&eacute;n puede implementarse por un <strong>mecanismo directo</strong> donde los agentes simplemente reportan su tipo de forma veraz. Esto simplifica enormemente el an&aacute;lisis: solo hay que verificar que decir la verdad sea &oacute;ptimo.</p>
+
+      <h4>Subastas cl&aacute;sicas</h4>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tipo</th><th>Regla</th><th>Estrategia &oacute;ptima</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Vickrey (2do precio, sobre cerrado)</strong></td><td>Gana la oferta m&aacute;s alta, pero paga el segundo precio m&aacute;s alto</td><td><strong>Estrategia dominante:</strong> ofertar tu valor real. No hay incentivo para exagerar ni subestimar.</td></tr>
+          <tr><td><strong>Primer precio (sobre cerrado)</strong></td><td>Gana la oferta m&aacute;s alta y paga lo que ofreci&oacute;</td><td>Ofertar <em>por debajo</em> de tu valor real (&ldquo;bid shading&rdquo;). Cu&aacute;nto por debajo depende de la distribuci&oacute;n de competidores.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>Aplicaciones modernas</h4>
+      <p>Uber, Airbnb y las plataformas digitales <strong>dise&ntilde;an mercados como juegos</strong>: el surge pricing, las comisiones, los sistemas de reputaci&oacute;n y los algoritmos de matching son mecanismos que alinean los incentivos de usuarios y proveedores.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Juego 3&times;3 resuelto paso a paso</summary>
+    <div class="deep-content">
+      <p>Resolvamos un juego m&aacute;s complejo que 2&times;2. Pagos en formato (J1, J2):</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>L</th><th>M</th><th>R</th></tr></thead>
+        <tbody>
+          <tr><td><strong>T</strong></td><td>(2, 2)</td><td>(0, 3)</td><td>(1, 1)</td></tr>
+          <tr><td><strong>M</strong></td><td>(3, 0)</td><td>(1, 1)</td><td>(0, 2)</td></tr>
+          <tr><td><strong>B</strong></td><td>(1, 1)</td><td>(2, 0)</td><td>(2, 2)</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>Paso 1: Buscar equilibrios puros</h4>
+      <p>Para cada celda, verificar si ambos pagos son mejor respuesta:</p>
+      <ul>
+        <li><strong>(T, L):</strong> J1 en col L: max(2, 3, 1) = 3 &ne; 2. No es mejor respuesta de J1. <strong>No es Nash.</strong></li>
+        <li><strong>(T, M):</strong> J1 en col M: max(0, 1, 2) = 2 &ne; 0. <strong>No.</strong></li>
+        <li><strong>(T, R):</strong> J1 en col R: max(1, 0, 2) = 2 &ne; 1. <strong>No.</strong></li>
+        <li><strong>(M, L):</strong> J2 en fila M: max(0, 1, 2) = 2 &ne; 0. <strong>No.</strong></li>
+        <li><strong>(M, M):</strong> J1 en col M: max(0, 1, 2) = 2 &ne; 1. <strong>No.</strong></li>
+        <li><strong>(M, R):</strong> J1 en col R: max(1, 0, 2) = 2 &ne; 0. <strong>No.</strong></li>
+        <li><strong>(B, L):</strong> J1 en col L: max(2, 3, 1) = 3 &ne; 1. <strong>No.</strong></li>
+        <li><strong>(B, M):</strong> J2 en fila B: max(1, 0, 2) = 2 &ne; 0. <strong>No.</strong></li>
+        <li><strong>(B, R):</strong> J1 en col R: max(1, 0, 2) = 2 &#x2713;. J2 en fila B: max(1, 0, 2) = 2 &#x2713;. <strong>&iexcl;Nash puro!</strong></li>
+      </ul>
+
+      <h4>Paso 2: Equilibrio mixto</h4>
+      <p>Para encontrar equilibrios mixtos, se buscan los soportes (subconjuntos de estrategias usadas con probabilidad positiva) donde cada jugador es indiferente entre las estrategias del soporte. Se plantean las ecuaciones de indiferencia y se resuelve el sistema.</p>
+      <p>En este juego, el proceso requiere verificar m&uacute;ltiples combinaciones de soporte (2&times;2, 2&times;3, 3&times;3). Es un c&aacute;lculo m&aacute;s extenso pero sigue el mismo principio que en 2&times;2: igualar las utilidades esperadas.</p>
+    </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 5: FUNCIÓN DE UTILIDAD Y OPTIMIZACIÓN ═══════════ -->
+<div class="tab-panel" id="tab-funcion">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Sección 5</div>
+    <h2>Función de utilidad y optimización</h2>
+
+    <h3>Función de utilidad formal</h3>
+    <p>Una función U: resultados --> números reales que asigna a cada resultado un valor numérico representando la preferencia del agente. Un agente racional siempre elige la acción que maximiza U.</p>
+    <div class="callout">
+      <strong>En IA:</strong> la función de utilidad es el equivalente de la reward function en aprendizaje por refuerzo y de la evaluation function en agentes de juego (como la función de evaluación de un motor de ajedrez).
+    </div>
+
+    <h3>Utilidad multi-atributo (MAUT)</h3>
+    <p>Cuando una decisión involucra múltiples criterios (costo, calidad, tiempo), se usa la teoría de utilidad multi-atributo:</p>
+    <div class="callout">
+      <strong>U(x) = w1 * u1(x1) + w2 * u2(x2) + ... + wn * un(xn)</strong><br>
+      Donde wi son los pesos (importancia relativa) de cada criterio y la suma de pesos es 1.
+    </div>
+
+    <h3>Ejemplo: elegir estrategia de inversión</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Peso (wi)</th><th>Conservadora u_i</th><th>Moderada u_i</th><th>Agresiva u_i</th></tr></thead>
+      <tbody>
+        <tr><td>Rendimiento esperado</td><td>0.4</td><td>0.3</td><td>0.7</td><td>1.0</td></tr>
+        <tr><td>Seguridad</td><td>0.35</td><td>1.0</td><td>0.6</td><td>0.2</td></tr>
+        <tr><td>Liquidez</td><td>0.25</td><td>0.8</td><td>0.5</td><td>0.4</td></tr>
+        <tr><td><strong>U total</strong></td><td></td><td><strong>0.67</strong></td><td><strong>0.615</strong></td><td><strong>0.57</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>U(Conservadora) = 0.4(0.3) + 0.35(1.0) + 0.25(0.8) = 0.67. La estrategia conservadora gana porque el decisor pondera mucho la seguridad.</p>
+
+    <h3>Árboles de decisión</h3>
+    <p>Un árbol de decisión combina nodos de decisión (cuadrados), nodos de azar (círculos) y hojas (utilidades). Se resuelve por <strong>inducción hacia atrás</strong> (backward induction): empezar por las hojas y propagarse hacia la raíz.</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Componente</th><th>Símbolo</th><th>Significado</th></tr></thead>
+      <tbody>
+        <tr><td>Nodo de decisión</td><td>Cuadrado</td><td>El agente elige una acción</td></tr>
+        <tr><td>Nodo de azar</td><td>Círculo</td><td>La naturaleza elige un resultado con cierta probabilidad</td></tr>
+        <tr><td>Rama</td><td>Línea</td><td>Una acción posible o un resultado posible</td></tr>
+        <tr><td>Hoja</td><td>Triángulo/valor</td><td>La utilidad final del camino</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Ejemplo: decisión de expandir negocio</h3>
+    <p>Una empresa decide si expandirse o no. Si se expande, hay 60% de demanda alta ($500k utilidad) y 40% de demanda baja (-$100k). Si no se expande, gana $150k seguros.</p>
+    <div class="code-block"><span class="cmt"># Árbol de decisión resuelto por backward induction</span>
+
+<span class="cmt"># Nodo de azar (si se expande):</span>
+EU_expandir = <span class="str">0.6</span> * <span class="str">500_000</span> + <span class="str">0.4</span> * (-<span class="str">100_000</span>)
+<span class="cmt"># EU_expandir = 300,000 - 40,000 = 260,000</span>
+
+<span class="cmt"># Nodo de decisión (raíz):</span>
+no_expandir = <span class="str">150_000</span>
+
+<span class="fn">print</span>(<span class="str">f"Expandir: ${EU_expandir:,.0f}"</span>)   <span class="cmt"># $260,000</span>
+<span class="fn">print</span>(<span class="str">f"No expandir: ${no_expandir:,.0f}"</span>) <span class="cmt"># $150,000</span>
+<span class="fn">print</span>(<span class="str">f"Decisión óptima: {'Expandir' if EU_expandir > no_expandir else 'No expandir'}"</span>)
+<span class="cmt"># Decisión óptima: Expandir (utilidad esperada $260,000 > $150,000)</span></div>
+
+    <div class="callout warn">
+      <strong>Ojo:</strong> este resultado asume neutralidad al riesgo. Un agente averso al riesgo podría preferir los $150k seguros, porque la posibilidad de perder $100k tiene un impacto desproporcionado en su utilidad. Por eso la función de utilidad importa: u($260k esperado) no es lo mismo que u($150k seguro) para todos.
+    </div>
+
+    <h3>Conexión con IA</h3>
+    <div class="concept-row">
+      <div class="concept-card">
+        <h4>Aprendizaje por refuerzo</h4>
+        <p>La <strong>reward function</strong> es una función de utilidad. El agente aprende la política que maximiza la recompensa acumulada descontada.</p>
+        <p>Ejemplo: AlphaGo usa recompensa +1 (ganar) y -1 (perder).</p>
+      </div>
+      <div class="concept-card t2">
+        <h4>Agentes de juego</h4>
+        <p>Los motores de ajedrez usan una <strong>evaluation function</strong> que asigna utilidad a cada posición del tablero. Minimax + poda alfa-beta buscan la jugada óptima.</p>
+      </div>
+      <div class="concept-card t3">
+        <h4>Sistemas multi-agente</h4>
+        <p>Cuando múltiples agentes de IA interactúan, la teoría de juegos modela sus incentivos. El equilibrio de Nash predice su comportamiento estable.</p>
+      </div>
+    </div>
+
+    <h3>Ejemplo aplicado al problema prototípico</h3>
+    <p>Un productor agrícola decide entre tres estrategias de diversificación. Usando MAUT con criterios de rentabilidad, riesgo climático y demanda de mercado:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Criterio</th><th>Peso</th><th>Monocultivo</th><th>Diversificar 2 cultivos</th><th>Diversificar 3 cultivos</th></tr></thead>
+      <tbody>
+        <tr><td>Rentabilidad esperada</td><td>0.45</td><td>0.9</td><td>0.7</td><td>0.5</td></tr>
+        <tr><td>Resiliencia climática</td><td>0.35</td><td>0.2</td><td>0.6</td><td>0.9</td></tr>
+        <tr><td>Acceso a mercado</td><td>0.20</td><td>0.8</td><td>0.7</td><td>0.5</td></tr>
+        <tr><td><strong>U total</strong></td><td></td><td><strong>0.635</strong></td><td><strong>0.665</strong></td><td><strong>0.640</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Diversificar con 2 cultivos (U = 0.665) resulta la estrategia óptima: equilibra rentabilidad con resiliencia climática, sin fragmentar demasiado el acceso a mercado.</p>
+
+    <!-- Deep dives Tab 5 -->
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: MAUT formal &mdash; condiciones de independencia</summary>
+    <div class="deep-content">
+      <p>La f&oacute;rmula aditiva U(x) = &sum; k<sub>i</sub> &middot; u<sub>i</sub>(x<sub>i</sub>) no siempre es v&aacute;lida. Requiere una condici&oacute;n t&eacute;cnica importante.</p>
+
+      <h4>Independencia preferencial</h4>
+      <p>Los atributos X<sub>1</sub>, ..., X<sub>n</sub> son <strong>preferencialmente independientes</strong> si las preferencias sobre cualquier subconjunto de atributos no dependen de los valores fijos de los dem&aacute;s.</p>
+      <p>Cuando esta condici&oacute;n se cumple, la forma aditiva es v&aacute;lida:</p>
+      <div class="formula">U(x<sub>1</sub>, ..., x<sub>n</sub>) = &sum; k<sub>i</sub> &middot; u<sub>i</sub>(x<sub>i</sub>), donde &sum; k<sub>i</sub> = 1</div>
+
+      <h4>Obtenci&oacute;n de los pesos k<sub>i</sub></h4>
+      <p>Se obtienen mediante <strong>trade-offs</strong>: preguntarle al decisor cu&aacute;nto de un atributo sacrificar&iacute;a por mejorar otro. Por ejemplo: &ldquo;&iquest;cu&aacute;nta seguridad sacrificas por un 10% m&aacute;s de rendimiento?&rdquo;</p>
+
+      <h4>Forma multiplicativa</h4>
+      <p>Cuando la independencia aditiva no se cumple (pero s&iacute; la independencia de utilidad), se usa la <strong>forma multiplicativa de Keeney-Raiffa</strong>:</p>
+      <div class="formula">1 + K &middot; U(x) = &prod; [1 + K &middot; k<sub>i</sub> &middot; u<sub>i</sub>(x<sub>i</sub>)]</div>
+      <p>donde K es una constante que se resuelve num&eacute;ricamente a partir de los k<sub>i</sub>.</p>
+      <p><em>Fuente: Keeney, R. &amp; Raiffa, H. (1976). Decisions with Multiple Objectives. Wiley.</em></p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Conexiones con IA y Ciencia de Datos</summary>
+    <div class="deep-content">
+      <p>Los conceptos de utilidad, decisiones y juegos no son solo teor&iacute;a: est&aacute;n en el coraz&oacute;n de los sistemas de IA m&aacute;s avanzados.</p>
+
+      <h4>LLMs y RLHF</h4>
+      <p>Los modelos de lenguaje grandes (GPT, Claude, etc.) se afinan con <strong>Reinforcement Learning from Human Feedback</strong>. El <em>reward model</em> entrenado a partir de preferencias humanas es esencialmente una <strong>aproximaci&oacute;n a la funci&oacute;n de utilidad VNM</strong>: asigna puntaje a cada respuesta seg&uacute;n qu&eacute; tanto la preferir&iacute;a un humano. El RL maximiza esa utilidad esperada.</p>
+
+      <h4>RL multi-agente y Nash</h4>
+      <p>Cuando m&uacute;ltiples agentes de IA interact&uacute;an (AlphaGo via self-play, Pluribus en p&oacute;ker), los algoritmos de entrenamiento buscan converger a <strong>equilibrios de Nash</strong>. Pluribus (2019) fue el primer agente de IA en ganar a profesionales en p&oacute;ker de 6 jugadores, calculando estrategias de equilibrio en tiempo real.</p>
+
+      <h4>&Aacute;rboles de decisi&oacute;n: ML vs Teor&iacute;a</h4>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspecto</th><th>&Aacute;rbol ML (Random Forest, etc.)</th><th>&Aacute;rbol de decisi&oacute;n (Teor&iacute;a)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Prop&oacute;sito</strong></td><td>Clasificar/predecir particionando features</td><td>Modelar decisiones secuenciales con incertidumbre</td></tr>
+          <tr><td><strong>Criterio de split</strong></td><td>Minimizar impureza (Gini, entrop&iacute;a)</td><td>Maximizar utilidad esperada</td></tr>
+          <tr><td><strong>Resoluci&oacute;n</strong></td><td>Entrenamiento supervisado (datos)</td><td>Backward induction (razonamiento)</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>Bandits como problema de decisi&oacute;n secuencial</h4>
+      <p>El problema del <strong>multi-armed bandit</strong> es un caso puro de decisi&oacute;n bajo incertidumbre:</p>
+      <ul>
+        <li><strong>Exploraci&oacute;n:</strong> probar opciones desconocidas para estimar sus pagos</li>
+        <li><strong>Explotaci&oacute;n:</strong> elegir la opci&oacute;n que hasta ahora parece mejor</li>
+        <li>Algoritmos como <strong>UCB</strong> (Upper Confidence Bound) y <strong>Thompson Sampling</strong> resuelven este trade-off de forma &oacute;ptima</li>
+      </ul>
+      <p>Aplicaciones: A/B testing en p&aacute;ginas web, recomendaciones de contenido, asignaci&oacute;n de recursos en investigaci&oacute;n cl&iacute;nica.</p>
+    </div>
+    </details>
+
+    <details class="deep-dive">
+    <summary>&#x1F52C; Profundizaci&oacute;n: Backward induction &mdash; ejemplo de 3 etapas</summary>
+    <div class="deep-content">
+      <p>Un ejemplo m&aacute;s complejo de inducci&oacute;n hacia atr&aacute;s con m&uacute;ltiples nodos de decisi&oacute;n y azar.</p>
+
+      <h4>Estructura del &aacute;rbol</h4>
+      <ol>
+        <li><strong>Decisi&oacute;n 1 (ra&iacute;z):</strong> elegir Ruta A o Ruta B</li>
+        <li><strong>Nodo de azar:</strong> demanda Alta (p = 0.6) o Baja (p = 0.4)</li>
+        <li><strong>Decisi&oacute;n 2:</strong> seg&uacute;n el resultado del azar, elegir acci&oacute;n C o D</li>
+      </ol>
+
+      <h4>Pagos en las hojas</h4>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ruta</th><th>Demanda</th><th>Acci&oacute;n</th><th>Pago</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>Alta</td><td>C</td><td>120</td></tr>
+          <tr><td>A</td><td>Alta</td><td>D</td><td>90</td></tr>
+          <tr><td>A</td><td>Baja</td><td>C</td><td>-20</td></tr>
+          <tr><td>A</td><td>Baja</td><td>D</td><td>30</td></tr>
+          <tr><td>B</td><td>Alta</td><td>C</td><td>80</td></tr>
+          <tr><td>B</td><td>Alta</td><td>D</td><td>70</td></tr>
+          <tr><td>B</td><td>Baja</td><td>C</td><td>40</td></tr>
+          <tr><td>B</td><td>Baja</td><td>D</td><td>50</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h4>Paso 1: Resolver nodos terminales de decisi&oacute;n (etapa 3)</h4>
+      <div class="formula">Ruta A, Alta: max(C=120, D=90) = 120 (elige C)
+Ruta A, Baja: max(C=-20, D=30) = 30 (elige D)
+Ruta B, Alta: max(C=80, D=70) = 80 (elige C)
+Ruta B, Baja: max(C=40, D=50) = 50 (elige D)</div>
+
+      <h4>Paso 2: Resolver nodos de azar (etapa 2)</h4>
+      <div class="formula">EU(Ruta A) = 0.6(120) + 0.4(30) = 72 + 12 = 84
+EU(Ruta B) = 0.6(80) + 0.4(50) = 48 + 20 = 68</div>
+
+      <h4>Paso 3: Resolver nodo de decisi&oacute;n ra&iacute;z (etapa 1)</h4>
+      <div class="formula">max(Ruta A = 84, Ruta B = 68) = 84 &rarr; Elegir Ruta A</div>
+
+      <p><strong>Pol&iacute;tica &oacute;ptima:</strong> elegir Ruta A. Si la demanda es alta, hacer C (pago 120). Si la demanda es baja, hacer D (pago 30). Utilidad esperada: 84.</p>
+    </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 6: DEFENSA ═══════════ -->
+<div class="tab-panel" id="tab-defensa">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Preparación para defensa</div>
+    <h2>Preguntas frecuentes de defensa</h2>
+    <p>Preguntas que podrían hacer Haro o los compañeros durante la presentación. Haz clic para ver la respuesta.</p>
+    <div id="qaContainer"></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ TAB 7: QUIZ ═══════════ -->
+<div class="tab-panel" id="tab-quiz">
+<div class="content">
+  <div class="section">
+    <div class="section-label">Bloque C &middot; Auto-evaluación</div>
+    <h2>Quiz rápido (20 preguntas)</h2>
+    <p>Contesta las 20 preguntas para verificar que dominas el contenido del Bloque C. Al final verás tu puntuación.</p>
+    <div id="quizContainer"></div>
+    <div id="quizScore"></div>
+    <div style="text-align:center;"><button id="resetQuizBtn" onclick="resetQuiz()">Reiniciar quiz</button></div>
+  </div>
+</div>
+</div>
+
+<footer>
+  LCDN4INT10 Inteligencia Artificial &middot; Universidad Nacional Rosario Castellanos &middot; Septiembre 2026
+</footer>
+
+<script>
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Defense Q&A ──
+const qaData = [
+  { q: '¿Qué diferencia hay entre decisión bajo riesgo y bajo incertidumbre?', a: '<p><strong>Bajo riesgo:</strong> conocemos los posibles resultados Y sus probabilidades. Podemos calcular el valor esperado o la utilidad esperada. Ejemplo: lanzar un dado justo, donde P(cada cara) = 1/6.</p><p><strong>Bajo incertidumbre:</strong> conocemos los posibles resultados pero NO las probabilidades. Debemos usar criterios como maximin (pesimista), maximax (optimista) o minimax regret (Savage).</p><p>En la práctica, muchas decisiones reales caen entre ambos: tenemos estimaciones imperfectas de las probabilidades. La teoría bayesiana permite actualizar estas estimaciones con nueva evidencia.</p>' },
+  { q: '¿Qué es la utilidad esperada y por qué es mejor que el valor esperado?', a: '<p>La utilidad esperada es U(L) = suma de p_i * u(x_i), donde u es una función de utilidad que transforma el valor monetario en satisfacción subjetiva.</p><p>Es mejor que el valor esperado porque captura las <strong>actitudes frente al riesgo</strong>. La Paradoja de San Petersburgo demuestra que el valor esperado puede ser infinito mientras nadie pagaría más de unos pocos pesos. Con utilidad logarítmica, la utilidad esperada converge.</p><p>Ejemplo concreto: una persona aversa al riesgo con u(x) = sqrt(x) prefiere $50k seguros (u = 223.6) que 50% chance de $100k (u esperada = 0.5*316.2 + 0.5*0 = 158.1), aunque el valor esperado es el mismo.</p>' },
+  { q: '¿Qué es un equilibrio de Nash y por qué importa?', a: '<p>Un equilibrio de Nash es un conjunto de estrategias (una por jugador) donde <strong>nadie puede mejorar cambiando solo su propia estrategia</strong>. Es el punto de estabilidad: si todos juegan su estrategia de Nash, nadie tiene incentivo para desviarse.</p><p>Importa porque:<br>1. Predice el comportamiento de agentes racionales en interacción estratégica.<br>2. El teorema de Nash (1950) garantiza que todo juego finito tiene al menos un equilibrio (posiblemente mixto).<br>3. En IA, es fundamental para diseñar sistemas multi-agente, mecanismos de subasta y protocolos de negociación.</p>' },
+  { q: '¿Puede un equilibrio de Nash ser ineficiente? Ejemplo.', a: '<p>Sí, es la lección principal del <strong>Dilema del Prisionero</strong>. El equilibrio de Nash es (Traicionar, Traicionar) con pagos (-2, -2), pero (Cooperar, Cooperar) con pagos (-1, -1) es mejor para ambos.</p><p>El equilibrio de Nash es <strong>Pareto-ineficiente</strong>: existe otro resultado donde al menos un jugador mejora sin que nadie empeore. La racionalidad individual no garantiza el óptimo colectivo.</p><p>Esto tiene implicaciones enormes: contaminación ambiental, carreras armamentísticas y congestión de tráfico son todos "dilemas del prisionero" a escala social.</p>' },
+  { q: '¿Cuándo usar estrategia pura vs mixta?', a: '<p><strong>Estrategia pura</strong> cuando existe un equilibrio donde cada jugador elige una acción específica. Es predecible y fácil de implementar. Ejemplo: el Dilema del Prisionero tiene equilibrio puro en (Traicionar, Traicionar).</p><p><strong>Estrategia mixta</strong> cuando no hay equilibrio puro, o cuando ser predecible es una desventaja. En piedra/papel/tijera no hay equilibrio puro; el equilibrio mixto es 1/3 cada opción. Si jugaras siempre piedra, el rival jugaría siempre papel.</p><p>En la práctica de IA, los agentes usan estrategias mixtas cuando necesitan ser impredecibles (seguridad, subastas) y puras cuando la coordinación es beneficiosa.</p>' },
+  { q: '¿Qué propiedades debe tener una función de utilidad racional?', a: '<p>Las cuatro propiedades (axiomas de von Neumann-Morgenstern):</p><p><strong>1. Completitud:</strong> para todo par A, B el agente puede decir si prefiere A, prefiere B, o es indiferente. No hay "no sé".</p><p><strong>2. Transitividad:</strong> si A > B y B > C, entonces A > C. Sin ciclos de preferencia.</p><p><strong>3. Continuidad:</strong> si A > B > C, existe alguna lotería entre A y C equivalente a B con certeza.</p><p><strong>4. Independencia:</strong> si A > B, mezclar ambos con el mismo tercer resultado C no cambia la preferencia.</p><p>Si un agente cumple estos 4 axiomas, se puede representar sus preferencias con una función de utilidad numérica. Violar cualquiera lleva a decisiones irracionales (por ejemplo, "money pump" si se viola transitividad).</p>' },
+  { q: '¿Cómo se resuelve un juego por eliminación de estrategias dominadas?', a: '<p>Paso a paso:<br>1. Buscar una fila (estrategia de J1) o columna (estrategia de J2) que esté <strong>estrictamente dominada</strong> por otra (da peor pago en TODAS las combinaciones).<br>2. Eliminarla de la matriz: ningún jugador racional la elegiría.<br>3. En la matriz reducida, buscar nuevas estrategias dominadas (la eliminación puede revelar nuevas dominaciones).<br>4. Repetir hasta que no queden dominadas.</p><p>Si queda una sola celda, ese es el resultado. Si quedan varias, hay que buscar equilibrios de Nash en la matriz reducida.</p><p><strong>Importante:</strong> solo funciona con dominación estricta (no débil) para que el orden de eliminación no afecte el resultado.</p>' },
+  { q: '¿Qué es la Paradoja de San Petersburgo y qué nos enseña?', a: '<p>Un casino ofrece un juego: lanza una moneda hasta que salga cara. Si sale cara en el lanzamiento n, paga 2^n pesos. El valor esperado es infinito: E = 1 + 1 + 1 + ... = infinito.</p><p>Pero nadie pagaría ni $1,000 por jugar. ¿Por qué? Porque los humanos no maximizan dinero sino <strong>utilidad</strong>. Daniel Bernoulli (1738) propuso u(x) = ln(x), donde la utilidad marginal decrece.</p><p><strong>Lección:</strong> el valor esperado no es suficiente para modelar decisiones racionales. Necesitamos la utilidad esperada, que captura la aversión al riesgo. Este insight es la base de toda la economía financiera moderna y de cómo diseñamos funciones de recompensa en IA.</p>' },
+  { q: '¿Cómo se conecta la teoría de juegos con la IA?', a: '<p>Conexiones directas:<br><strong>1. Agentes racionales:</strong> un agente que maximiza utilidad en un entorno con otros agentes está jugando un juego. Nash equilibrium predice su comportamiento estable.</p><p><strong>2. Minimax:</strong> el algoritmo minimax (para juegos de suma cero) es la base de los motores de ajedrez. Alfa-beta pruning lo hace eficiente.</p><p><strong>3. Aprendizaje por refuerzo multi-agente:</strong> cuando varios agentes de RL interactúan, convergen a equilibrios de Nash (o correlacionados).</p><p><strong>4. Diseño de mecanismos:</strong> diseñar reglas de subasta, votación o asignación de recursos donde los agentes tienen incentivo a ser honestos (revelación de verdad).</p><p><strong>5. GANs:</strong> las redes generativas adversarias son literalmente un juego de dos jugadores (generador vs discriminador) que converge a un equilibrio de Nash.</p>' },
+  { q: '¿Cómo aplicarías la toma de decisiones a un problema real?', a: '<p>Para un problema prototípico como diversificación de cultivos:</p><p><strong>1. Identificar acciones:</strong> monocultivo, 2 cultivos, 3 cultivos.</p><p><strong>2. Identificar estados:</strong> sequía, lluvia normal, lluvia excesiva.</p><p><strong>3. Estimar pagos:</strong> rendimiento por hectárea para cada combinación acción-estado.</p><p><strong>4. Elegir criterio según información disponible:</strong><br>- Con datos históricos de clima: valor esperado o utilidad esperada<br>- Sin datos: maximin (si el productor es conservador), minimax regret (equilibrado)</p><p><strong>5. Para múltiples criterios</strong> (rentabilidad, riesgo, mercado): usar MAUT con pesos que reflejen las prioridades del productor.</p><p><strong>6. Árbol de decisión</strong> si hay decisiones secuenciales (primero sembrar, luego decidir si regar según el clima).</p><p>La clave es que el framework formal obliga a explicitar supuestos, criterios y trade-offs que de otra forma quedarían implícitos.</p>' }
+];
+
+const qaContainer = document.getElementById('qaContainer');
+qaData.forEach((item, i) => {
+  const div = document.createElement('div');
+  div.className = 'qa-item';
+  div.innerHTML = `
+    <div class="qa-q" tabindex="0" role="button" onclick="toggleQA(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQA(this)}">
+      <span class="qa-num">${String(i+1).padStart(2,'0')}</span>
+      <span>${item.q}</span>
+      <span class="qa-arrow">&#9660;</span>
+    </div>
+    <div class="qa-a"><div class="qa-a-inner">${item.a}</div></div>`;
+  qaContainer.appendChild(div);
+});
+
+function toggleQA(el) {
+  const item = el.parentElement;
+  const answer = item.querySelector('.qa-a');
+  const isOpen = item.classList.contains('open');
+  item.classList.toggle('open');
+  answer.style.maxHeight = isOpen ? '0' : answer.scrollHeight + 'px';
+}
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.qa-item.open .qa-a').forEach(a => {
+    a.style.maxHeight = a.scrollHeight + 'px';
+  });
+});
+
+// ── Quiz ──
+const quizData = [
+  { q: '¿Qué estudia la teoría de decisiones normativa?', opts: ['Cómo decide la gente realmente','Cómo debería decidir un agente racional','Los sesgos cognitivos humanos','La historia de la economía'], correct: 1, explain: 'La teoría normativa define axiomas y reglas matemáticas para la decisión racional. La descriptiva estudia cómo decide la gente realmente (con sesgos).' },
+  { q: '¿Qué criterio elige la acción con el mejor peor caso?', opts: ['Maximax','Minimax regret','Maximin (Wald)','Valor esperado'], correct: 2, explain: 'Maximin (Wald) es el criterio pesimista: para cada acción toma el peor resultado posible y elige la acción cuyo peor caso sea el menos malo.' },
+  { q: '¿Qué necesitas para usar el criterio de valor esperado?', opts: ['Solo los nombres de las acciones','Los pagos y las probabilidades de cada estado','Un árbol de decisión completo','Conocer las estrategias del oponente'], correct: 1, explain: 'El valor esperado E[a] = suma de p_i * payoff_i requiere conocer tanto los pagos como las probabilidades. Sin probabilidades, se usan criterios bajo incertidumbre.' },
+  { q: '¿Qué tipo de utilidad permite comparar magnitudes de preferencia?', opts: ['Ordinal','Cardinal','Nominal','Categórica'], correct: 1, explain: 'La utilidad cardinal asigna números con magnitud significativa: u(A)=10, u(B)=6 permite decir que A se prefiere el doble que B. La ordinal solo ordena (A > B > C) sin magnitud.' },
+  { q: '¿Qué forma tiene la función de utilidad de una persona aversa al riesgo?', opts: ['Convexa (curvada hacia arriba)','Lineal (recta)','Cóncava (curvada hacia abajo)','Escalonada'], correct: 2, explain: 'Averso al riesgo = función cóncava (por ejemplo sqrt(x) o ln(x)). La utilidad marginal decrece: cada peso adicional vale menos. Por eso prefiere lo seguro.' },
+  { q: '¿Qué demuestra la Paradoja de San Petersburgo?', opts: ['Que los casinos siempre ganan','Que el valor esperado no basta para modelar decisiones','Que la gente es irracional','Que los juegos de azar deben prohibirse'], correct: 1, explain: 'El juego tiene valor esperado infinito pero nadie pagaría mucho por jugarlo. Esto demuestra que los humanos maximizan utilidad (no dinero), lo que motivó la teoría de utilidad esperada de Bernoulli.' },
+  { q: '¿Cuál propiedad de la utilidad dice que si A > B y B > C, entonces A > C?', opts: ['Completitud','Independencia','Transitividad','Continuidad'], correct: 2, explain: 'Transitividad prohíbe ciclos de preferencia. Si la violas, alguien puede hacerte un "money pump": sacarte dinero intercambiando A por B por C por A indefinidamente.' },
+  { q: '¿Qué componentes definen un juego en teoría de juegos?', opts: ['Tablero, fichas y reglas','Jugadores, estrategias, pagos e información','Probabilidades y estados de la naturaleza','Acciones y criterios de decisión'], correct: 1, explain: 'Un juego se define por sus jugadores, las estrategias disponibles para cada uno, los pagos (utilidades) resultantes y la información que tiene cada jugador.' },
+  { q: 'En un juego de suma cero, ¿qué pasa con los pagos?', opts: ['Ambos jugadores siempre ganan','Lo que uno gana, el otro lo pierde','Los pagos son siempre positivos','No hay pagos, solo estrategias'], correct: 1, explain: 'En un juego de suma cero, la suma de los pagos de todos los jugadores es siempre cero (o constante). Lo que gana un jugador es exactamente lo que pierde el otro. Ejemplos: ajedrez, póker.' },
+  { q: '¿Cuál es el equilibrio de Nash del Dilema del Prisionero?', opts: ['(Cooperar, Cooperar)','(Cooperar, Traicionar)','(Traicionar, Cooperar)','(Traicionar, Traicionar)'], correct: 3, explain: 'Traicionar es estrategia dominante para ambos, así que el único equilibrio de Nash es (Traicionar, Traicionar) con pagos (-2,-2), aunque (Cooperar, Cooperar) sería mejor para ambos.' },
+  { q: '¿Qué es una estrategia dominante?', opts: ['La que tiene el pago más alto en la matriz','La que da mejor resultado sin importar qué haga el oponente','La que el jugador elige más frecuentemente','La primera estrategia en la matriz'], correct: 1, explain: 'Una estrategia dominante da mejor pago que cualquier otra alternativa, sin importar la estrategia del oponente. Si existe, un jugador racional siempre la elige.' },
+  { q: '¿Qué garantiza el teorema de Nash (1950)?', opts: ['Que siempre hay estrategia dominante','Que todo juego finito tiene al menos un equilibrio de Nash','Que el equilibrio de Nash es siempre eficiente','Que los juegos cooperativos son mejores'], correct: 1, explain: 'Nash demostró que todo juego finito (finitos jugadores, finitas estrategias) tiene al menos un equilibrio de Nash, posiblemente en estrategias mixtas. No garantiza que sea eficiente ni único.' },
+  { q: '¿Cuál es el equilibrio mixto de piedra/papel/tijera?', opts: ['Siempre jugar piedra','Alternar piedra y papel','Jugar cada opción con probabilidad 1/3','No tiene equilibrio'], correct: 2, explain: 'Piedra/papel/tijera no tiene equilibrio en estrategias puras (cualquier elección fija es explotable). El equilibrio mixto es jugar cada opción con probabilidad 1/3, haciendo al oponente indiferente.' },
+  { q: '¿Qué es MAUT?', opts: ['Un tipo de red neuronal','Teoría de utilidad multi-atributo','Un algoritmo de búsqueda','Un método de compresión'], correct: 1, explain: 'MAUT (Multi-Attribute Utility Theory) permite tomar decisiones cuando hay múltiples criterios: U(x) = suma de w_i * u_i(x_i), donde los pesos w_i reflejan la importancia relativa de cada criterio.' },
+  { q: '¿Cómo se resuelve un árbol de decisión?', opts: ['De la raíz a las hojas (forward)','De las hojas a la raíz (backward induction)','Por fuerza bruta','Solo los nodos de azar'], correct: 1, explain: 'Backward induction (inducción hacia atrás): se empieza por las hojas, se calcula la utilidad esperada en los nodos de azar y se elige la mejor acción en los nodos de decisión, propagándose hacia la raíz.' },
+  { q: '¿Qué relación tiene el equilibrio de Nash con la eficiencia de Pareto?', opts: ['Nash siempre es Pareto-óptimo','Nash nunca es Pareto-óptimo','Nash puede ser Pareto-ineficiente','Son lo mismo'], correct: 2, explain: 'El Dilema del Prisionero demuestra que un equilibrio de Nash puede ser Pareto-ineficiente: (Traicionar, Traicionar) es Nash pero (Cooperar, Cooperar) es mejor para ambos. La racionalidad individual no garantiza optimalidad colectiva.' },
+  { q: '¿Cuál es la reward function en aprendizaje por refuerzo?', opts: ['El algoritmo de backpropagation','La función de utilidad del agente','La base de datos de entrenamiento','El optimizador de pesos'], correct: 1, explain: 'La reward function en RL es el equivalente directo de la función de utilidad: asigna un valor numérico a cada estado o transición, y el agente aprende a maximizar la recompensa acumulada.' },
+  { q: '¿Qué juego modela la situación donde confiar da el mejor resultado colectivo pero es arriesgado?', opts: ['Dilema del Prisionero','Batalla de los sexos','Caza del ciervo (Stag Hunt)','Juego del gallina'], correct: 2, explain: 'En la Caza del ciervo, cooperar para cazar el ciervo da el mejor resultado, pero requiere que ambos cooperen. Cazar liebre es seguro pero da menos. El dilema es confiar en que el otro cooperará.' },
+  { q: '¿Qué criterio de decisión construye una tabla de arrepentimiento?', opts: ['Maximin','Maximax','Minimax regret (Savage)','Laplace'], correct: 2, explain: 'Minimax regret (Savage) calcula el arrepentimiento (diferencia entre el mejor pago posible y el obtenido) para cada combinación acción-estado, y elige la acción cuyo arrepentimiento máximo sea el menor.' },
+  { q: '¿Qué son las GANs en términos de teoría de juegos?', opts: ['Un juego cooperativo entre dos redes','Un juego de suma cero entre generador y discriminador que converge a Nash','Un algoritmo genético aplicado a redes','Un método de búsqueda heurística'], correct: 1, explain: 'Las GANs (Generative Adversarial Networks) son un juego de suma cero entre dos redes: el generador intenta engañar al discriminador, y el discriminador intenta distinguir datos reales de falsos. El entrenamiento busca el equilibrio de Nash del juego.' }
+];
+
+let quizAnswered = 0;
+let quizCorrect = 0;
+const quizContainer = document.getElementById('quizContainer');
+
+function buildQuiz() {
+  quizContainer.innerHTML = '';
+  quizData.forEach((item, qi) => {
+    const card = document.createElement('div');
+    card.className = 'quiz-card';
+    card.id = 'quiz-' + qi;
+    let optsHtml = item.opts.map((o, oi) =>
+      `<div class="quiz-opt" tabindex="0" role="button" data-qi="${qi}" data-oi="${oi}" onclick="answerQuiz(${qi},${oi})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();answerQuiz(${qi},${oi})}">
+        <span class="marker">${'ABCD'[oi]}</span><span>${o}</span>
+      </div>`
+    ).join('');
+    card.innerHTML = `<h4>${qi+1}. ${item.q}</h4><div class="quiz-opts">${optsHtml}</div><div class="quiz-feedback" id="fb-${qi}"></div>`;
+    quizContainer.appendChild(card);
+  });
+}
+buildQuiz();
+
+function resetQuiz() {
+  quizAnswered = 0;
+  quizCorrect = 0;
+  document.getElementById('quizScore').style.display = 'none';
+  document.getElementById('resetQuizBtn').style.display = 'none';
+  buildQuiz();
+  quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function answerQuiz(qi, oi) {
+  const card = document.getElementById('quiz-' + qi);
+  if (card.dataset.answered) return;
+  card.dataset.answered = '1';
+  quizAnswered++;
+  const opts = card.querySelectorAll('.quiz-opt');
+  const fb = document.getElementById('fb-' + qi);
+  const item = quizData[qi];
+  opts.forEach((o, i) => {
+    if (i === item.correct) o.classList.add('correct');
+    if (i === oi && i !== item.correct) o.classList.add('wrong');
+    o.style.cursor = 'default';
+  });
+  if (oi === item.correct) {
+    quizCorrect++;
+    fb.className = 'quiz-feedback show right';
+    fb.textContent = 'Correcto. ' + item.explain;
+  } else {
+    fb.className = 'quiz-feedback show wrong-fb';
+    fb.textContent = 'Incorrecto. ' + item.explain;
+  }
+  if (quizAnswered === quizData.length) {
+    const scoreEl = document.getElementById('quizScore');
+    scoreEl.style.display = 'block';
+    const pct = Math.round(quizCorrect/quizData.length*100);
+    scoreEl.textContent = `Resultado: ${quizCorrect}/${quizData.length} (${pct}%)`;
+    scoreEl.style.color = quizCorrect >= 14 ? 'var(--success)' : 'var(--error)';
+    document.getElementById('resetQuizBtn').style.display = 'inline-block';
+  }
+}
+</script>
+</body>
+</html>
