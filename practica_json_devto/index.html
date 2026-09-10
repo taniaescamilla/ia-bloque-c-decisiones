@@ -256,10 +256,14 @@
     margin-top:2rem;
   }
 
+  .schema-table { display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .quick-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+
   @media (max-width:768px) {
     .metrics-grid { grid-template-columns:1fr; }
     .crud-summary { grid-template-columns:repeat(2,1fr); }
     .hero h1 { font-size:1.6rem; }
+    .quick-grid { grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -331,12 +335,12 @@
         <tr><td>Documentacion</td><td>developers.forem.com/api/v1</td></tr>
         <tr><td>Autenticacion</td><td>No requerida para GET (lectura publica)</td></tr>
         <tr><td>Formato</td><td>JSON (Content-Type: application/json)</td></tr>
-        <tr><td>Rate limit</td><td>30 requests por 30 segundos</td></tr>
-        <tr><td>Metodos disponibles</td><td>GET (publico), POST/PUT/DELETE (requieren API key)</td></tr>
+        <tr><td>Rate limit</td><td>3 GET/s y 30 GET/min por IP (configuracion actual de Forem; puede variar)</td></tr>
+        <tr><td>Metodos de articulos</td><td>GET publico; POST y PUT requieren API key. Forem V1 permite despublicar, pero no expone DELETE de articulos</td></tr>
       </table>
 
       <div class="note warn">
-        <strong>Nota sobre escritura:</strong> Para las operaciones de escritura (POST, PUT, DELETE), Dev.to requiere un API key personal. Como esta es una practica academica y no queremos exponer credenciales, usamos DummyJSON como endpoint de simulacion para esas 3 operaciones. Los GET son 100% reales contra Dev.to.
+        <strong>Nota sobre escritura:</strong> Dev.to requiere API key para POST y PUT. Ademas, Forem V1 no expone un endpoint DELETE para articulos (solo permite despublicar). Como esta es una practica academica y no queremos exponer credenciales, usamos DummyJSON como endpoint de simulacion para POST, PUT y DELETE. Los GET son 100% reales contra Dev.to.
       </div>
     </div>
   </div>
@@ -552,7 +556,7 @@
         <strong>Nota sobre ai_disclosure_level:</strong> Este campo de Dev.to indica si el autor declaro haber usado IA para escribir el articulo. "not_disclosed" = no lo menciona, "some_ai" = uso parcial de IA, "fully_ai" = generado completamente con IA.
       </div>
 
-      <p>JSON Schema es fundamental en NoSQL porque <strong>la base de datos no impone estructura</strong> (a diferencia de SQL con CREATE TABLE). El Schema funciona como contrato entre quien escribe y quien lee los datos.</p>
+      <p>JSON Schema es fundamental en NoSQL porque <strong>MongoDB usa un esquema flexible por defecto</strong> (a diferencia de SQL con CREATE TABLE), aunque tambien permite reglas de validacion de esquema para controlar campos y tipos. El Schema funciona como contrato entre quien escribe y quien lee los datos.</p>
     </div>
   </div>
 
@@ -699,32 +703,50 @@
       <h2>Conexion con NoSQL (MongoDB)</h2>
     </div>
     <div class="step-content">
-      <p>Cada archivo JSON del equipo se puede insertar directamente en una coleccion de MongoDB sin modificar la estructura:</p>
+      <p>Cada archivo JSON del equipo es un objeto con metadata (<code>fuente</code>, <code>endpoint</code>, <code>responsable</code>) y un array <code>articulos</code> adentro. Para insertar los articulos en MongoDB hay que extraerlos primero:</p>
 
       <div class="code-block"><span class="comment">// mongosh es la terminal interactiva de MongoDB (como psql para PostgreSQL)</span>
 
 <span class="comment">// 1. "use" selecciona (o crea) una base de datos</span>
 <span class="keyword">use</span> practica_json_devto
 
-<span class="comment">// 2. "db.articulos" accede a la coleccion "articulos" (equivalente a una tabla SQL)</span>
-<span class="comment">//    "insertMany" inserta un array de documentos de golpe</span>
-db.articulos.insertMany([
-  <span class="comment">// ...contenido de daniel_ai_articles.json</span>
-])
+<span class="comment">// 2. Cargamos los 3 archivos JSON del equipo</span>
+<span class="comment">//    Cada archivo tiene { fuente, endpoint, responsable, categoria, articulos: [...] }</span>
+<span class="comment">//    No podemos hacer insertMany del objeto completo porque necesitamos solo los articulos</span>
+<span class="keyword">const</span> datosDaniel = <span class="string">JSON.parse</span>(cat(<span class="string">"daniel_ai_articles.json"</span>))
+<span class="keyword">const</span> datosStephanie = <span class="string">JSON.parse</span>(cat(<span class="string">"stephanie_webdev_articles.json"</span>))
+<span class="keyword">const</span> datosAbigail = <span class="string">JSON.parse</span>(cat(<span class="string">"abigail_datascience_articles.json"</span>))
 
-<span class="comment">// 3. "find" busca documentos. Las llaves {} son el filtro.</span>
+<span class="comment">// 3. Normalizamos: extraemos el array "articulos" de cada archivo</span>
+<span class="comment">//    y le agregamos "categoria" y "responsable" a cada documento</span>
+<span class="keyword">const</span> fuentes = [datosDaniel, datosStephanie, datosAbigail]
+<span class="keyword">const</span> articulos = fuentes.flatMap(<span class="keyword">function</span>(fuente) {
+  <span class="keyword">return</span> fuente.articulos.map(<span class="keyword">function</span>(art) {
+    <span class="keyword">return</span> Object.assign({}, art, {
+      categoria: fuente.categoria,
+      responsable: fuente.responsable
+    })
+  })
+})
+
+<span class="comment">// 4. "insertMany" inserta un array de documentos de golpe</span>
+<span class="comment">//    Ahora si tenemos 15 documentos planos, cada uno con sus campos originales</span>
+<span class="comment">//    MAS categoria y responsable heredados del archivo fuente</span>
+db.articulos.insertMany(articulos)
+
+<span class="comment">// 5. "find" busca documentos. Las llaves {} son el filtro.</span>
 <span class="comment">//    "$gt" significa "greater than" (mayor que). Es un operador de MongoDB.</span>
 <span class="comment">//    Equivalente SQL: SELECT * FROM articulos WHERE public_reactions_count > 50</span>
 db.articulos.find({
   <span class="string">"public_reactions_count"</span>: { <span class="keyword">$gt</span>: <span class="number">50</span> }
 })
 
-<span class="comment">// 4. "aggregate" es el pipeline de procesamiento de MongoDB.</span>
+<span class="comment">// 6. "aggregate" es el pipeline de procesamiento de MongoDB.</span>
 <span class="comment">//    "$group" agrupa documentos (como GROUP BY en SQL).</span>
 <span class="comment">//    "_id" define el campo por el que agrupamos (categoria).</span>
 <span class="comment">//    "$sum: 1" cuenta documentos (como COUNT(*)).</span>
 <span class="comment">//    "$avg" calcula el promedio (como AVG()).</span>
-<span class="comment">//    Equivalente SQL: SELECT categoria, COUNT(*), AVG(reactions) FROM articulos GROUP BY categoria</span>
+<span class="comment">//    Equivalente SQL: SELECT categoria, COUNT(*), AVG(public_reactions_count) FROM articulos GROUP BY categoria</span>
 db.articulos.aggregate([
   { <span class="keyword">$group</span>: {
     <span class="string">"_id"</span>: <span class="string">"$categoria"</span>,
@@ -736,15 +758,15 @@ db.articulos.aggregate([
       <p><strong>Comparacion directa SQL vs MongoDB:</strong></p>
       <table class="schema-table">
         <tr><th>SQL</th><th>MongoDB</th></tr>
-        <tr><td><code>SELECT * FROM articulos WHERE reactions > 50</code></td><td><code>db.articulos.find({"reactions": {$gt: 50}})</code></td></tr>
+        <tr><td><code>SELECT * FROM articulos WHERE public_reactions_count > 50</code></td><td><code>db.articulos.find({"public_reactions_count": {$gt: 50}})</code></td></tr>
         <tr><td><code>INSERT INTO articulos VALUES (...)</code></td><td><code>db.articulos.insertOne({...})</code></td></tr>
         <tr><td><code>UPDATE articulos SET title='X' WHERE id=1</code></td><td><code>db.articulos.updateOne({id:1}, {$set:{title:"X"}})</code></td></tr>
         <tr><td><code>DELETE FROM articulos WHERE id=1</code></td><td><code>db.articulos.deleteOne({id:1})</code></td></tr>
-        <tr><td><code>SELECT cat, COUNT(*), AVG(r) GROUP BY cat</code></td><td><code>db.articulos.aggregate([{$group:{...}}])</code></td></tr>
+        <tr><td><code>SELECT categoria, COUNT(*), AVG(public_reactions_count) FROM articulos GROUP BY categoria</code></td><td><code>db.articulos.aggregate([{$group:{_id:"$categoria", total:{$sum:1}, avg:{$avg:"$public_reactions_count"}}}])</code></td></tr>
       </table>
 
       <div class="note">
-        <strong>SQL vs NoSQL - la diferencia clave:</strong> En SQL, el campo <code>tag_list</code> (array) necesitaria una tabla intermedia (articulos_tags) con foreign keys. En MongoDB, el array se almacena embebido en el documento. Lo mismo con <code>user</code> (objeto anidado) que en SQL seria una tabla separada con JOIN. Esta es la ventaja del modelo de documentos cuando la estructura es jerarquica.
+        <strong>SQL vs NoSQL - la diferencia de modelado:</strong> En un diseno relacional normalizado, el campo <code>tag_list</code> (array) normalmente se modelaria con una tabla intermedia (articulos_tags) con foreign keys. En MongoDB, el array se almacena embebido en el documento. Lo mismo con <code>user</code> (objeto anidado) que en SQL normalizado seria una tabla separada con JOIN. Nota: PostgreSQL y otros motores SQL modernos tambien pueden almacenar arrays y JSON nativamente, pero el modelo de documentos es la fortaleza natural de MongoDB.
       </div>
 
       <div class="note">
@@ -791,17 +813,16 @@ db.articulos.aggregate([
   |- <span class="file-json">schema_devto_article.json</span>            <span class="comment">  # JSON Schema draft/2020-12</span>
   |- <span class="file-json">catalogo_articulos_devto.json</span>        <span class="comment">  # Catalogo consolidado (15 articulos)</span>
   |- <span class="file-json">Practica_DevTo_API.postman_collection.json</span> <span class="comment"># Importar en Postman</span>
+  |- <span class="file-html">flowchart_pipeline.svg</span>                  <span class="comment">  # Diagrama de flujo del pipeline</span>
       </div>
     </div>
   </div>
-
-</div>
 
   <!-- REFERENCIA RAPIDA -->
   <div class="step-content" style="margin-top:2rem; border:2px solid var(--accent); background:linear-gradient(135deg, rgba(88,166,255,0.05), rgba(188,140,255,0.05));">
     <h2 style="color:var(--accent); margin-bottom:1rem; text-align:center;">Referencia Rapida (cheat sheet)</h2>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+    <div class="quick-grid">
       <div>
         <h4 style="color:var(--green); margin-bottom:0.5rem;">6 tipos de datos JSON</h4>
         <table class="schema-table" style="margin:0;">

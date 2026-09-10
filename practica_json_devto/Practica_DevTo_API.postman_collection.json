@@ -9,7 +9,7 @@
       "name": "1. GET - Articulos de AI (Daniel)",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dev.to/api/articles?tag=ai&top=7&per_page=5",
           "protocol": "https",
@@ -28,7 +28,7 @@
       "name": "2. GET - Articulos de WebDev (Stephanie)",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dev.to/api/articles?tag=webdev&top=7&per_page=5",
           "protocol": "https",
@@ -47,7 +47,7 @@
       "name": "3. GET - Articulos de Data Science (Abigail)",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dev.to/api/articles?tag=datascience&top=7&per_page=5",
           "protocol": "https",
@@ -66,7 +66,7 @@
       "name": "4. GET - Articulo individual por ID",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dev.to/api/articles/4559844",
           "protocol": "https",
@@ -77,10 +77,10 @@
       }
     },
     {
-      "name": "5. GET - Buscar articulos por texto",
+      "name": "5. GET - Articulos por tag machinelearning",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dev.to/api/articles?per_page=3&tag=machinelearning",
           "protocol": "https",
@@ -138,7 +138,7 @@
       "name": "8. DELETE - Eliminar articulo (simulado con DummyJSON)",
       "request": {
         "method": "DELETE",
-        "header": [],
+        "header": [{"key": "Accept", "value": "application/vnd.forem.api-v1+json"}],
         "url": {
           "raw": "https://dummyjson.com/products/1",
           "protocol": "https",

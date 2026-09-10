@@ -548,11 +548,12 @@ function syntaxHighlight(json) {
   );
 }
 
+var foremV1 = { Accept: 'application/vnd.forem.api-v1+json' };
 var exercises = {
-  1: { method: 'GET', url: 'https://dev.to/api/articles?tag=ai&top=7&per_page=5' },
-  2: { method: 'GET', url: 'https://dev.to/api/articles?tag=webdev&top=7&per_page=5' },
-  3: { method: 'GET', url: 'https://dev.to/api/articles/4559844' },
-  4: { method: 'GET', url: 'https://dev.to/api/articles?tag=datascience&top=7&per_page=5' },
+  1: { method: 'GET', url: 'https://dev.to/api/articles?tag=ai&top=7&per_page=5', headers: foremV1 },
+  2: { method: 'GET', url: 'https://dev.to/api/articles?tag=webdev&top=7&per_page=5', headers: foremV1 },
+  3: { method: 'GET', url: 'https://dev.to/api/articles/4559844', headers: foremV1 },
+  4: { method: 'GET', url: 'https://dev.to/api/articles?tag=datascience&top=7&per_page=5', headers: foremV1 },
   5: { method: 'POST', url: 'https://dummyjson.com/products/add', hasBody: true },
   6: { method: 'PUT', url: 'https://dummyjson.com/products/1', hasBody: true },
   7: { method: 'DELETE', url: 'https://dummyjson.com/products/1' }
@@ -569,10 +570,10 @@ async function runExercise(n) {
   responseEl.textContent = '';
   timeEl.textContent = '';
 
-  var opts = { method: ex.method };
+  var opts = { method: ex.method, headers: Object.assign({}, ex.headers || {}) };
   if (ex.hasBody) {
     var bodyEl = document.getElementById('body' + n);
-    opts.headers = { 'Content-Type': 'application/json' };
+    opts.headers['Content-Type'] = 'application/json';
     opts.body = bodyEl.value;
   }
 

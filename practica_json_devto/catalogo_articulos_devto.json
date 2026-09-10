@@ -68,7 +68,7 @@
     },
     "total_articulos_unicos": 12,
     "nota_duplicados": "3 articulos aparecen en 2 categorias por tener multiples tags. Total entries = 15, unicos = 12.",
-    "articulos_con_ai_disclosure": 4,
+    "articulos_ai_assisted": 4,
     "porcentaje_ai_assisted": 26.7
   },
   "aplicacion_newsletter": {
