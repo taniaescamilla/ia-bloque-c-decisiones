@@ -1,0 +1,104 @@
+{
+  "fuente": "Dev.to API",
+  "endpoint": "GET https://dev.to/api/articles?tag=ai&top=7&per_page=5",
+  "responsable": "Daniel Ruffo",
+  "categoria": "Inteligencia Artificial",
+  "fecha_consulta": "2026-09-09",
+  "total_articulos": 5,
+  "articulos": [
+    {
+      "id": 4559844,
+      "title": "20 Agentic AI Terms Every Developer Should Know (Explained Simply)",
+      "description": "Do you ever feel like the AI world has moved forward a little too quickly? You hear about agents, tool-use, MCP...",
+      "url": "https://dev.to/sylwia-lask/20-agentic-ai-terms-every-developer-should-know-explained-simply-jii",
+      "published_at": "2026-09-03T06:44:57Z",
+      "reading_time_minutes": 11,
+      "comments_count": 115,
+      "public_reactions_count": 217,
+      "tag_list": ["ai", "agents", "mcp", "beginners"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Sylwia Laskowska",
+        "username": "sylwia-lask",
+        "github_username": "sylwia-lask"
+      }
+    },
+    {
+      "id": 4576085,
+      "title": "From AI Solutions to Shared Knowledge: Building an MCP for the Community",
+      "description": "This is a submission for the Weekend Challenge: Generosity Edition...",
+      "url": "https://dev.to/pascal_cescato_692b7a8a20/from-ai-solutions-to-shared-knowledge-building-an-mcp-for-the-community-6bk",
+      "published_at": "2026-09-07T03:34:19Z",
+      "reading_time_minutes": 8,
+      "comments_count": 80,
+      "public_reactions_count": 112,
+      "tag_list": ["devchallenge", "weekendchallenge", "ai", "mcp"],
+      "ai_disclosure_level": "some_ai",
+      "user": {
+        "name": "Pascal CESCATO",
+        "username": "pascal_cescato_692b7a8a20",
+        "github_username": "pcescato"
+      }
+    },
+    {
+      "id": 4603458,
+      "title": "Most 'AI Agents' Are Just If-Statements in a Trench Coat",
+      "description": "I built an agent last year, and I was proud of it...",
+      "url": "https://dev.to/james_anderson_h/most-ai-agents-are-just-if-statements-in-a-trench-coat-3960",
+      "published_at": "2026-09-08T06:12:03Z",
+      "reading_time_minutes": 7,
+      "comments_count": 58,
+      "public_reactions_count": 58,
+      "tag_list": ["ai", "softwareengineering", "webdev", "agents"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "James Anderson",
+        "username": "james_anderson_h",
+        "github_username": null
+      }
+    },
+    {
+      "id": 4613387,
+      "title": "I let AI write 100% of my code for 30 days. Here's what broke.",
+      "description": "Not AI-assisted. Not copilot suggestions I edited. I made a rule: for 30 days, I don't write a single line...",
+      "url": "https://dev.to/infoinlet1/i-let-ai-write-100-of-my-code-for-30-days-heres-what-broke-1aa0",
+      "published_at": "2026-09-09T09:08:18Z",
+      "reading_time_minutes": 5,
+      "comments_count": 6,
+      "public_reactions_count": 27,
+      "tag_list": ["ai", "webdev", "programming", "career"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Info Inlet",
+        "username": "infoinlet1",
+        "github_username": null
+      }
+    },
+    {
+      "id": 4585631,
+      "title": "Markov Chain Monte Carlo: the 1953 algorithm hiding under modern AI",
+      "description": "Hello, I'm Maneshwar, and I'm building LiveReview, a blast-radius aware AI code review...",
+      "url": "https://dev.to/lovestaco/markov-chain-monte-carlo-the-1953-algorithm-hiding-under-modern-ai-5cb4",
+      "published_at": "2026-09-06T04:31:27Z",
+      "reading_time_minutes": 13,
+      "comments_count": 4,
+      "public_reactions_count": 18,
+      "tag_list": ["machinelearning", "python", "datascience", "computerscience"],
+      "ai_disclosure_level": "some_ai",
+      "user": {
+        "name": "Athreya aka Maneshwar",
+        "username": "lovestaco",
+        "github_username": "lovestaco"
+      }
+    }
+  ],
+  "analisis": {
+    "total_reactions": 432,
+    "total_comments": 263,
+    "promedio_reactions": 86.4,
+    "promedio_reading_time_min": 8.8,
+    "articulo_mas_popular": "20 Agentic AI Terms Every Developer Should Know",
+    "tags_frecuentes": ["ai", "agents", "mcp", "webdev", "machinelearning"],
+    "ai_assisted_percentage": 40
+  }
+}

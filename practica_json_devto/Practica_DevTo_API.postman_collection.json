@@ -1,0 +1,152 @@
+{
+  "info": {
+    "name": "Practica JSON - Dev.to API (Equipo Bloque A)",
+    "description": "Coleccion de Postman para la practica de JSON usando la API real de Dev.to.\nMateria: Base de Datos NoSQL - Prof. Silva\nEquipo: Daniel Ruffo, Stephanie Valencia, Abigail Reyes\nFecha: Septiembre 2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET - Articulos de AI (Daniel)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dev.to/api/articles?tag=ai&top=7&per_page=5",
+          "protocol": "https",
+          "host": ["dev", "to"],
+          "path": ["api", "articles"],
+          "query": [
+            { "key": "tag", "value": "ai" },
+            { "key": "top", "value": "7" },
+            { "key": "per_page", "value": "5" }
+          ]
+        },
+        "description": "Obtiene los 5 articulos mas populares de la semana con tag 'ai'.\nCada articulo tiene: id, title, url, reactions, comments, tags, user (objeto anidado).\nEsto demuestra GET con query parameters y respuesta JSON con objetos anidados."
+      }
+    },
+    {
+      "name": "2. GET - Articulos de WebDev (Stephanie)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dev.to/api/articles?tag=webdev&top=7&per_page=5",
+          "protocol": "https",
+          "host": ["dev", "to"],
+          "path": ["api", "articles"],
+          "query": [
+            { "key": "tag", "value": "webdev" },
+            { "key": "top", "value": "7" },
+            { "key": "per_page", "value": "5" }
+          ]
+        },
+        "description": "Obtiene los 5 articulos mas populares de la semana con tag 'webdev'."
+      }
+    },
+    {
+      "name": "3. GET - Articulos de Data Science (Abigail)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dev.to/api/articles?tag=datascience&top=7&per_page=5",
+          "protocol": "https",
+          "host": ["dev", "to"],
+          "path": ["api", "articles"],
+          "query": [
+            { "key": "tag", "value": "datascience" },
+            { "key": "top", "value": "7" },
+            { "key": "per_page", "value": "5" }
+          ]
+        },
+        "description": "Obtiene los 5 articulos mas populares de la semana con tag 'datascience'."
+      }
+    },
+    {
+      "name": "4. GET - Articulo individual por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dev.to/api/articles/4559844",
+          "protocol": "https",
+          "host": ["dev", "to"],
+          "path": ["api", "articles", "4559844"]
+        },
+        "description": "Obtiene un articulo completo por su ID. Incluye body_html, body_markdown, y todos los campos.\nDemuestra GET con path parameter."
+      }
+    },
+    {
+      "name": "5. GET - Buscar articulos por texto",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dev.to/api/articles?per_page=3&tag=machinelearning",
+          "protocol": "https",
+          "host": ["dev", "to"],
+          "path": ["api", "articles"],
+          "query": [
+            { "key": "per_page", "value": "3" },
+            { "key": "tag", "value": "machinelearning" }
+          ]
+        },
+        "description": "Busca articulos por tag 'machinelearning'. Demuestra filtrado con query parameters."
+      }
+    },
+    {
+      "name": "6. POST - Crear articulo (simulado con DummyJSON)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Como usar Dev.to API para un newsletter de AI\",\n  \"description\": \"Tutorial paso a paso para jalar articulos trending de AI y convertirlos en contenido para tu newsletter\",\n  \"category\": \"tutorial\",\n  \"tags\": [\"ai\", \"api\", \"newsletter\", \"automation\"],\n  \"reading_time_minutes\": 8,\n  \"reactions_count\": 0\n}"
+        },
+        "url": {
+          "raw": "https://dummyjson.com/products/add",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["products", "add"]
+        },
+        "description": "Simula la creacion de un articulo nuevo.\nDev.to requiere autenticacion para escribir, asi que usamos DummyJSON para demostrar POST.\nEl body muestra la estructura JSON que envias al servidor."
+      }
+    },
+    {
+      "name": "7. PUT - Actualizar articulo (simulado con DummyJSON)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Como usar Dev.to API para un newsletter de AI (Actualizado)\",\n  \"reading_time_minutes\": 10\n}"
+        },
+        "url": {
+          "raw": "https://dummyjson.com/products/1",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["products", "1"]
+        },
+        "description": "Simula la actualizacion parcial de un articulo existente.\nDemuestra PUT con body JSON que solo contiene los campos a modificar."
+      }
+    },
+    {
+      "name": "8. DELETE - Eliminar articulo (simulado con DummyJSON)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/products/1",
+          "protocol": "https",
+          "host": ["dummyjson", "com"],
+          "path": ["products", "1"]
+        },
+        "description": "Simula la eliminacion de un articulo.\nDemuestra DELETE - no requiere body, solo la URL con el ID del recurso."
+      }
+    }
+  ]
+}

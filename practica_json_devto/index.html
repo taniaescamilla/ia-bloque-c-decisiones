@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practica JSON en Equipo - Pipeline de Contenido con Dev.to API</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --orange: #f0883e;
+    --cyan: #39d3f5;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #1a1e2e 0%, #0f1923 50%, #0d1117 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .hero .label { display:inline-block; background:rgba(88,166,255,0.15); color:var(--accent); padding:0.3rem 1rem; border-radius:20px; font-size:0.85rem; margin-bottom:1rem; letter-spacing:0.5px; }
+  .hero h1 { font-size:2.2rem; margin-bottom:0.5rem; }
+  .hero h1 span { color:var(--accent); }
+  .hero .subtitle { color:var(--dim); font-size:1.05rem; max-width:700px; margin:0 auto 1.5rem; }
+  .hero .team-row { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
+  .hero .team-member { background:var(--surface); border:1px solid var(--border); padding:0.4rem 1rem; border-radius:20px; font-size:0.9rem; }
+  .hero .team-member strong { color:var(--accent); }
+  .hero .meta-row { color:var(--dim); font-size:0.85rem; }
+
+  .container { max-width:960px; margin:0 auto; padding:2rem 1.5rem; }
+
+  .toc {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.5rem 2rem;
+    margin-bottom:2.5rem;
+  }
+  .toc h2 { font-size:1.1rem; color:var(--accent); margin-bottom:0.8rem; }
+  .toc ol { padding-left:1.2rem; }
+  .toc li { margin-bottom:0.4rem; font-size:0.95rem; }
+  .toc a { color:var(--text); text-decoration:none; }
+  .toc a:hover { color:var(--accent); text-decoration:underline; }
+
+  .step {
+    margin-bottom:3rem;
+    scroll-margin-top: 20px;
+  }
+  .step-header {
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    margin-bottom:1.2rem;
+  }
+  .step-num {
+    width:48px; height:48px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:1.3rem;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .step-header h2 { font-size:1.4rem; }
+
+  .step-content {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.5rem;
+  }
+  .step-content p { margin-bottom:1rem; color:var(--dim); font-size:0.95rem; }
+  .step-content p strong { color:var(--text); }
+
+  .note {
+    background:rgba(88,166,255,0.08);
+    border-left:3px solid var(--accent);
+    padding:0.8rem 1rem;
+    margin:1rem 0;
+    border-radius:0 6px 6px 0;
+    font-size:0.9rem;
+    color:var(--dim);
+  }
+  .note strong { color:var(--accent); }
+  .note.warn { border-left-color:var(--yellow); background:rgba(210,153,34,0.08); }
+  .note.warn strong { color:var(--yellow); }
+  .note.success { border-left-color:var(--green); background:rgba(63,185,80,0.08); }
+  .note.success strong { color:var(--green); }
+
+  .code-block {
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:1rem;
+    margin:1rem 0;
+    font-family:'Cascadia Code','Fira Code',monospace;
+    font-size:0.85rem;
+    overflow-x:auto;
+    white-space:pre;
+    line-height:1.5;
+  }
+  .code-block .comment { color:var(--dim); }
+  .code-block .keyword { color:var(--purple); }
+  .code-block .string { color:var(--green); }
+  .code-block .url { color:var(--cyan); }
+  .code-block .method { color:var(--yellow); font-weight:700; }
+  .code-block .number { color:var(--orange); }
+
+  .file-card {
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem;
+    margin:0.8rem 0;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+  .file-icon { font-size:1.6rem; flex-shrink:0; }
+  .file-info h4 { font-size:0.95rem; margin-bottom:0.15rem; }
+  .file-info p { font-size:0.82rem; color:var(--dim); }
+
+  .schema-table {
+    width:100%;
+    border-collapse:collapse;
+    margin:1rem 0;
+    font-size:0.88rem;
+  }
+  .schema-table th {
+    background:var(--bg);
+    padding:0.6rem 0.8rem;
+    text-align:left;
+    border:1px solid var(--border);
+    color:var(--accent);
+    font-weight:600;
+  }
+  .schema-table td {
+    padding:0.5rem 0.8rem;
+    border:1px solid var(--border);
+    color:var(--dim);
+  }
+  .schema-table tr:hover td { background:rgba(88,166,255,0.03); }
+  .type-tag {
+    display:inline-block;
+    padding:0.1rem 0.4rem;
+    border-radius:4px;
+    font-size:0.78rem;
+    font-weight:600;
+    font-family:monospace;
+  }
+  .type-string { background:#1a3a2a; color:var(--green); }
+  .type-number { background:#2a2a1a; color:var(--orange); }
+  .type-array { background:#1a1a3a; color:var(--purple); }
+  .type-object { background:#2a1a2a; color:var(--cyan); }
+  .type-boolean { background:#3a2a1a; color:var(--yellow); }
+
+  .metrics-grid {
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1rem;
+    margin:1rem 0;
+  }
+  .metric-card {
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem;
+    text-align:center;
+  }
+  .metric-card .value { font-size:1.8rem; font-weight:800; color:var(--accent); }
+  .metric-card .label { font-size:0.82rem; color:var(--dim); margin-top:0.3rem; }
+
+  .crud-summary {
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:0.8rem;
+    margin:1rem 0;
+  }
+  .crud-card {
+    text-align:center;
+    padding:1rem 0.5rem;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:var(--bg);
+  }
+  .crud-card .badge {
+    display:inline-block;
+    padding:0.2rem 0.8rem;
+    border-radius:4px;
+    font-weight:700;
+    margin-bottom:0.5rem;
+  }
+  .crud-card .desc { font-size:0.8rem; color:var(--dim); }
+  .crud-card .status { font-size:0.75rem; margin-top:0.5rem; }
+  .badge-get { background:#1a3a2a; color:var(--green); }
+  .badge-post { background:#2a2a1a; color:var(--yellow); }
+  .badge-put { background:#1a1a3a; color:var(--accent); }
+  .badge-del { background:#3a1a1a; color:var(--red); }
+
+  .tree {
+    font-family:'Cascadia Code','Fira Code',monospace;
+    font-size:0.85rem;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:1rem;
+    margin:1rem 0;
+    line-height:1.6;
+    overflow-x:auto;
+  }
+  .tree .folder { color:var(--accent); }
+  .tree .file-json { color:var(--green); }
+  .tree .file-html { color:var(--orange); }
+
+  .reflection {
+    background: linear-gradient(135deg, rgba(88,166,255,0.05), rgba(188,140,255,0.05));
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1.5rem;
+    margin:1.5rem 0;
+  }
+  .reflection h3 { color:var(--accent); margin-bottom:0.8rem; font-size:1.1rem; }
+  .reflection p { color:var(--dim); font-size:0.92rem; margin-bottom:0.8rem; }
+
+  .btn-demo {
+    display:inline-block;
+    background:linear-gradient(135deg, var(--accent), var(--purple));
+    color:#fff;
+    padding:0.8rem 2rem;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:1rem;
+    margin:1rem 0;
+    transition:opacity 0.2s;
+  }
+  .btn-demo:hover { opacity:0.85; }
+
+  .footer {
+    text-align:center;
+    padding:2rem;
+    color:var(--dim);
+    font-size:0.85rem;
+    border-top:1px solid var(--border);
+    margin-top:2rem;
+  }
+
+  @media (max-width:768px) {
+    .metrics-grid { grid-template-columns:1fr; }
+    .crud-summary { grid-template-columns:repeat(2,1fr); }
+    .hero h1 { font-size:1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="label">Base de Datos NoSQL - 4to Semestre LCDN</div>
+  <h1>Practica <span>JSON</span> en Equipo</h1>
+  <p class="subtitle">Pipeline de curaduria de contenido usando la API publica de Dev.to. Datos 100% reales, operaciones CRUD verificadas, JSON Schema validado.</p>
+  <div class="team-row">
+    <div class="team-member"><strong>Daniel Ruffo</strong> - tag: ai</div>
+    <div class="team-member"><strong>Stephanie Valencia</strong> - tag: webdev</div>
+    <div class="team-member"><strong>Abigail Reyes</strong> - tag: datascience</div>
+  </div>
+  <div class="meta-row">Prof. Adrian Silva Ramirez | Septiembre 2026 | Universidad Nacional Rosario Castellanos</div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h2>Indice de pasos</h2>
+    <ol>
+      <li><a href="#step1">Identificar la API y su documentacion</a></li>
+      <li><a href="#step2">Conectar a la API con GET (lectura real)</a></li>
+      <li><a href="#step3">Analizar la estructura JSON de la respuesta</a></li>
+      <li><a href="#step4">Recolectar datos por equipo (3 categorias)</a></li>
+      <li><a href="#step5">Definir un JSON Schema de validacion</a></li>
+      <li><a href="#step6">Operaciones CRUD completas (POST, PUT, DELETE)</a></li>
+      <li><a href="#step7">Catalogo consolidado y analisis cruzado</a></li>
+      <li><a href="#step8">Coleccion Postman para reproducir</a></li>
+      <li><a href="#step9">Conexion con NoSQL (MongoDB)</a></li>
+      <li><a href="#step10">Reflexion del equipo</a></li>
+    </ol>
+  </div>
+
+  <!-- GLOSARIO RAPIDO -->
+  <div class="step-content" style="margin-bottom:2rem; border-left:3px solid var(--purple);">
+    <h3 style="color:var(--purple); margin-bottom:0.8rem;">Glosario rapido</h3>
+    <table class="schema-table">
+      <tr><th>Termino</th><th>Que significa</th></tr>
+      <tr><td><strong>API</strong></td><td>Application Programming Interface. Una puerta de entrada que permite a un programa pedir datos o acciones a otro sistema a traves de URLs.</td></tr>
+      <tr><td><strong>Endpoint</strong></td><td>La URL especifica donde la API recibe peticiones. Ejemplo: <code>https://dev.to/api/articles</code> es el endpoint de articulos.</td></tr>
+      <tr><td><strong>REST</strong></td><td>Representational State Transfer. Un estilo de arquitectura para APIs web que usa metodos HTTP (GET, POST, PUT, DELETE) y URLs para organizar las operaciones.</td></tr>
+      <tr><td><strong>fetch()</strong></td><td>Funcion de JavaScript que permite hacer peticiones HTTP desde el navegador. Es como decirle al browser "ve a esta URL y traeme lo que responda."</td></tr>
+      <tr><td><strong>Rate limit</strong></td><td>Limite de peticiones que puedes hacer por periodo de tiempo. Si lo excedes, el servidor responde con error 429 (Too Many Requests) y debes esperar.</td></tr>
+      <tr><td><strong>API key</strong></td><td>Una clave secreta que identifica a tu aplicacion ante el servidor. Algunos endpoints la requieren para controlar quien puede escribir datos.</td></tr>
+      <tr><td><strong>Content-Type</strong></td><td>Encabezado HTTP que indica el formato de los datos enviados. <code>application/json</code> significa que el body va en formato JSON.</td></tr>
+      <tr><td><strong>Pipeline</strong></td><td>Flujo de procesamiento donde los datos pasan por varias etapas en orden (obtener, filtrar, validar, almacenar). Cada etapa transforma o enriquece los datos.</td></tr>
+    </table>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="step" id="step1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h2>Identificar la API y su documentacion</h2>
+    </div>
+    <div class="step-content">
+      <p>Antes de escribir una sola linea de codigo, necesitamos entender <strong>que API vamos a usar y por que</strong>. Para esta practica elegimos la API publica de <strong>Dev.to</strong> (plataforma de articulos para desarrolladores, construida sobre el framework open-source Forem).</p>
+
+      <div class="note">
+        <strong>Por que Dev.to y no una API dummy?</strong> Porque queremos datos reales que podamos verificar. Cada articulo que jalamos existe en dev.to con su URL, su autor y sus reacciones. Si el profesor abre el link, el articulo esta ahi.
+      </div>
+
+      <p><strong>Datos clave de la API:</strong></p>
+      <table class="schema-table">
+        <tr><th>Concepto</th><th>Detalle</th></tr>
+        <tr><td>Base URL</td><td><code>https://dev.to/api/articles</code></td></tr>
+        <tr><td>Documentacion</td><td>developers.forem.com/api/v1</td></tr>
+        <tr><td>Autenticacion</td><td>No requerida para GET (lectura publica)</td></tr>
+        <tr><td>Formato</td><td>JSON (Content-Type: application/json)</td></tr>
+        <tr><td>Rate limit</td><td>30 requests por 30 segundos</td></tr>
+        <tr><td>Metodos disponibles</td><td>GET (publico), POST/PUT/DELETE (requieren API key)</td></tr>
+      </table>
+
+      <div class="note warn">
+        <strong>Nota sobre escritura:</strong> Para las operaciones de escritura (POST, PUT, DELETE), Dev.to requiere un API key personal. Como esta es una practica academica y no queremos exponer credenciales, usamos DummyJSON como endpoint de simulacion para esas 3 operaciones. Los GET son 100% reales contra Dev.to.
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h2>Conectar a la API con GET (lectura real)</h2>
+    </div>
+    <div class="step-content">
+      <p>El primer paso practico es hacer una peticion <strong>GET</strong> a la API. Esto equivale al <strong>Read</strong> en CRUD. Usamos query parameters para filtrar los resultados:</p>
+
+      <div class="code-block"><span class="method">GET</span> <span class="url">https://dev.to/api/articles?tag=ai&top=7&per_page=5</span>
+
+<span class="comment">// Desglose de la URL:</span>
+<span class="comment">// - https://dev.to/api/articles  = endpoint base (coleccion de articulos)</span>
+<span class="comment">// - ?tag=ai                     = query param: filtrar por tag "ai"</span>
+<span class="comment">// - &top=7                      = query param: mas populares de los ultimos 7 dias</span>
+<span class="comment">// - &per_page=5                 = query param: limitar a 5 resultados</span></div>
+
+      <p><strong>Que hace cada query parameter?</strong></p>
+      <table class="schema-table">
+        <tr><th>Parametro</th><th>Tipo</th><th>Funcion</th></tr>
+        <tr><td><code>tag</code></td><td><span class="type-tag type-string">string</span></td><td>Filtra articulos que tengan este tag</td></tr>
+        <tr><td><code>top</code></td><td><span class="type-tag type-number">integer</span></td><td>Ventana de tiempo en dias (7 = ultima semana)</td></tr>
+        <tr><td><code>per_page</code></td><td><span class="type-tag type-number">integer</span></td><td>Cantidad maxima de resultados por pagina</td></tr>
+      </table>
+
+      <div class="note success">
+        <strong>Diferencia clave:</strong> Los <strong>query parameters</strong> van despues del <code>?</code> y filtran una coleccion. Los <strong>path parameters</strong> van en la URL misma (ej. <code>/articles/4559844</code>) y apuntan a un recurso especifico. Ambos son parte fundamental del diseno REST.
+      </div>
+
+      <p>La respuesta es un <strong>array de objetos JSON</strong>. Cada objeto representa un articulo con esta estructura:</p>
+
+      <div class="code-block"><span class="comment">// Respuesta real (extracto de 1 articulo):</span>
+{
+  <span class="string">"id"</span>: <span class="number">4559844</span>,
+  <span class="string">"title"</span>: <span class="string">"20 Agentic AI Terms Every Developer Should Know"</span>,
+  <span class="string">"url"</span>: <span class="string">"https://dev.to/sylwia-lask/20-agentic-ai-terms-..."</span>,
+  <span class="string">"published_at"</span>: <span class="string">"2026-09-03T06:44:57Z"</span>,
+  <span class="string">"reading_time_minutes"</span>: <span class="number">11</span>,
+  <span class="string">"comments_count"</span>: <span class="number">115</span>,
+  <span class="string">"public_reactions_count"</span>: <span class="number">217</span>,
+  <span class="string">"tag_list"</span>: [<span class="string">"ai"</span>, <span class="string">"agents"</span>, <span class="string">"mcp"</span>, <span class="string">"beginners"</span>],
+  <span class="string">"user"</span>: {
+    <span class="string">"name"</span>: <span class="string">"Sylwia Laskowska"</span>,
+    <span class="string">"username"</span>: <span class="string">"sylwia-lask"</span>
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h2>Analizar la estructura JSON de la respuesta</h2>
+    </div>
+    <div class="step-content">
+      <p>Cada articulo demuestra los <strong>6 tipos de datos JSON</strong> en accion:</p>
+
+      <table class="schema-table">
+        <tr><th>Tipo JSON</th><th>Ejemplo en la respuesta</th><th>Campo</th></tr>
+        <tr><td><span class="type-tag type-string">String</span></td><td><code>"20 Agentic AI Terms..."</code></td><td>title, url, published_at</td></tr>
+        <tr><td><span class="type-tag type-number">Number</span></td><td><code>217</code></td><td>id, comments_count, reactions</td></tr>
+        <tr><td><span class="type-tag type-boolean">Boolean</span></td><td><code>true</code> / <code>false</code></td><td>No hay un campo booleano explicito en esta respuesta, pero JSON soporta valores true/false. Ejemplo: <code>"is_published": true</code></td></tr>
+        <tr><td><span class="type-tag" style="background:#2a2020;color:var(--dim)">Null</span></td><td><code>null</code></td><td>github_username (cuando no tiene)</td></tr>
+        <tr><td><span class="type-tag type-array">Array</span></td><td><code>["ai", "agents", "mcp"]</code></td><td>tag_list</td></tr>
+        <tr><td><span class="type-tag type-object">Object</span></td><td><code>{"name": "Sylwia", ...}</code></td><td>user (objeto anidado)</td></tr>
+      </table>
+
+      <div class="note">
+        <strong>Objetos anidados:</strong> El campo <code>user</code> es un objeto dentro de otro objeto. En SQL esto requeriria una tabla separada con foreign key. En JSON (y en NoSQL/MongoDB), se almacena tal cual, embebido en el mismo documento. Este es uno de los diferenciadores principales de las bases de datos orientadas a documentos.
+      </div>
+
+      <p><strong>Detalle de la estructura completa por articulo:</strong></p>
+      <table class="schema-table">
+        <tr><th>Campo</th><th>Tipo</th><th>Requerido</th><th>Descripcion</th></tr>
+        <tr><td>id</td><td><span class="type-tag type-number">integer</span></td><td>Si</td><td>Identificador unico del articulo</td></tr>
+        <tr><td>title</td><td><span class="type-tag type-string">string</span></td><td>Si</td><td>Titulo del articulo (min 1 caracter)</td></tr>
+        <tr><td>description</td><td><span class="type-tag type-string">string</span></td><td>No</td><td>Resumen del contenido</td></tr>
+        <tr><td>url</td><td><span class="type-tag type-string">string (URI)</span></td><td>Si</td><td>URL verificable, patron: https://dev.to/...</td></tr>
+        <tr><td>published_at</td><td><span class="type-tag type-string">string (date-time)</span></td><td>Si</td><td>Fecha ISO 8601 con zona horaria</td></tr>
+        <tr><td>reading_time_minutes</td><td><span class="type-tag type-number">integer</span></td><td>Si</td><td>Tiempo estimado de lectura</td></tr>
+        <tr><td>comments_count</td><td><span class="type-tag type-number">integer</span></td><td>Si</td><td>Numero de comentarios</td></tr>
+        <tr><td>public_reactions_count</td><td><span class="type-tag type-number">integer</span></td><td>Si</td><td>Total de reacciones</td></tr>
+        <tr><td>tag_list</td><td><span class="type-tag type-array">array[string]</span></td><td>Si</td><td>Tags del articulo (max 4)</td></tr>
+        <tr><td>ai_disclosure_level</td><td><span class="type-tag type-string">enum</span></td><td>No</td><td>"not_disclosed" | "some_ai" | "fully_ai"</td></tr>
+        <tr><td>user</td><td><span class="type-tag type-object">object</span></td><td>Si</td><td>Autor: {name, username, github_username}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div class="step" id="step4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h2>Recolectar datos por equipo (3 categorias)</h2>
+    </div>
+    <div class="step-content">
+      <p>Cada miembro del equipo consulto una categoria distinta de la API, simulando un <strong>pipeline de curaduria</strong> donde multiples fuentes alimentan un catalogo unificado:</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="value">5</div>
+          <div class="label">Articulos AI<br>(Daniel)</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">5</div>
+          <div class="label">Articulos WebDev<br>(Stephanie)</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">5</div>
+          <div class="label">Articulos DataSci<br>(Abigail)</div>
+        </div>
+      </div>
+
+      <p><strong>Archivos JSON generados:</strong></p>
+
+      <div class="file-card">
+        <div class="file-icon">&#128196;</div>
+        <div class="file-info">
+          <h4>daniel_ai_articles.json</h4>
+          <p>5 articulos con tag "ai" - Top: "20 Agentic AI Terms" (217 reactions, 115 comments)</p>
+        </div>
+      </div>
+      <div class="file-card">
+        <div class="file-icon">&#128196;</div>
+        <div class="file-info">
+          <h4>stephanie_webdev_articles.json</h4>
+          <p>5 articulos con tag "webdev" - Top: "Most AI Agents Are Just If-Statements" (58 reactions)</p>
+        </div>
+      </div>
+      <div class="file-card">
+        <div class="file-icon">&#128196;</div>
+        <div class="file-info">
+          <h4>abigail_datascience_articles.json</h4>
+          <p>5 articulos con tag "datascience" - Top: "Markov Chain Monte Carlo" (18 reactions)</p>
+        </div>
+      </div>
+
+      <div class="note success">
+        <strong>Verificable:</strong> Cada articulo tiene su URL real en Dev.to. Si abres <code>https://dev.to/sylwia-lask/20-agentic-ai-terms-every-developer-should-know-explained-simply-jii</code> en el navegador, encontraras el articulo exacto con las mismas metricas (las reacciones pueden variar en tiempo real).
+      </div>
+
+      <p>Cada archivo JSON tiene la misma estructura estandarizada:</p>
+      <div class="code-block">{
+  <span class="string">"fuente"</span>: <span class="string">"Dev.to API"</span>,
+  <span class="string">"endpoint"</span>: <span class="string">"GET https://dev.to/api/articles?tag=ai&top=7&per_page=5"</span>,
+  <span class="string">"responsable"</span>: <span class="string">"Daniel Ruffo"</span>,
+  <span class="string">"categoria"</span>: <span class="string">"Inteligencia Artificial"</span>,
+  <span class="string">"fecha_consulta"</span>: <span class="string">"2026-09-09"</span>,
+  <span class="string">"articulos"</span>: [ ... ],    <span class="comment">// array de 5 objetos</span>
+  <span class="string">"analisis"</span>: {             <span class="comment">// objeto con metricas agregadas</span>
+    <span class="string">"total_reactions"</span>: <span class="number">432</span>,
+    <span class="string">"promedio_reactions"</span>: <span class="number">86.4</span>,
+    <span class="string">"articulo_mas_popular"</span>: <span class="string">"..."</span>
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- PASO 5 -->
+  <div class="step" id="step5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h2>Definir un JSON Schema de validacion</h2>
+    </div>
+    <div class="step-content">
+      <p>Para asegurar que los 3 archivos del equipo tienen la <strong>misma estructura</strong>, definimos un JSON Schema (draft 2020-12) que valida:</p>
+
+      <div class="code-block"><span class="comment">// schema_devto_article.json (extracto)</span>
+{
+  <span class="string">"$schema"</span>: <span class="string">"https://json-schema.org/draft/2020-12/schema"</span>,
+  <span class="string">"type"</span>: <span class="string">"object"</span>,
+  <span class="string">"required"</span>: [<span class="string">"fuente"</span>, <span class="string">"endpoint"</span>, <span class="string">"responsable"</span>, <span class="string">"articulos"</span>],
+  <span class="string">"properties"</span>: {
+    <span class="string">"fuente"</span>: { <span class="string">"const"</span>: <span class="string">"Dev.to API"</span> },   <span class="comment">// valor fijo</span>
+    <span class="string">"endpoint"</span>: { <span class="string">"pattern"</span>: <span class="string">"^GET https://dev\\.to/api/articles"</span> },
+    <span class="string">"articulos"</span>: {
+      <span class="string">"type"</span>: <span class="string">"array"</span>,
+      <span class="string">"items"</span>: {
+        <span class="string">"required"</span>: [<span class="string">"id"</span>, <span class="string">"title"</span>, <span class="string">"url"</span>, <span class="string">"tag_list"</span>, <span class="string">"user"</span>],
+        <span class="string">"properties"</span>: {
+          <span class="string">"url"</span>: { <span class="string">"pattern"</span>: <span class="string">"^https://dev\\.to/"</span> },
+          <span class="string">"tag_list"</span>: { <span class="string">"maxItems"</span>: <span class="number">4</span> },
+          <span class="string">"ai_disclosure_level"</span>: {
+            <span class="string">"enum"</span>: [<span class="string">"not_disclosed"</span>, <span class="string">"some_ai"</span>, <span class="string">"fully_ai"</span>]
+          }
+        }
+      }
+    }
+  }
+}</div>
+
+      <div class="note">
+        <strong>Que valida el Schema:</strong> Que <code>fuente</code> sea exactamente "Dev.to API" (const), que el endpoint cumpla un patron regex, que cada articulo tenga los campos requeridos, que las URLs empiecen con https://dev.to/, que <code>tag_list</code> no exceda 4 elementos, y que <code>ai_disclosure_level</code> sea uno de 3 valores permitidos (enum).
+      </div>
+
+      <p><strong>Que significa cada keyword del Schema:</strong></p>
+      <table class="schema-table">
+        <tr><th>Keyword</th><th>Que hace</th><th>Ejemplo en nuestro schema</th></tr>
+        <tr><td><code>const</code></td><td>El campo debe tener EXACTAMENTE este valor</td><td><code>"fuente"</code> debe ser <code>"Dev.to API"</code>, no otro texto</td></tr>
+        <tr><td><code>pattern</code></td><td>El texto debe cumplir esta expresion regular (patron)</td><td>Las URLs deben empezar con <code>https://dev.to/</code></td></tr>
+        <tr><td><code>enum</code></td><td>Solo se permite UNO de estos valores (lista cerrada)</td><td><code>ai_disclosure_level</code>: "not_disclosed", "some_ai", o "fully_ai"</td></tr>
+        <tr><td><code>required</code></td><td>Estos campos DEBEN existir en el objeto (no opcionales)</td><td>Cada articulo debe tener id, title, url, tag_list, user</td></tr>
+        <tr><td><code>maxItems</code></td><td>Maximo de elementos permitidos en un array</td><td><code>tag_list</code> puede tener maximo 4 tags</td></tr>
+        <tr><td><code>minLength</code></td><td>El texto debe tener al menos N caracteres</td><td><code>title</code> no puede estar vacio (minLength: 1)</td></tr>
+      </table>
+
+      <div class="note">
+        <strong>Nota sobre ai_disclosure_level:</strong> Este campo de Dev.to indica si el autor declaro haber usado IA para escribir el articulo. "not_disclosed" = no lo menciona, "some_ai" = uso parcial de IA, "fully_ai" = generado completamente con IA.
+      </div>
+
+      <p>JSON Schema es fundamental en NoSQL porque <strong>la base de datos no impone estructura</strong> (a diferencia de SQL con CREATE TABLE). El Schema funciona como contrato entre quien escribe y quien lee los datos.</p>
+    </div>
+  </div>
+
+  <!-- PASO 6 -->
+  <div class="step" id="step6">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <h2>Operaciones CRUD completas</h2>
+    </div>
+    <div class="step-content">
+      <p>CRUD son las 4 operaciones basicas sobre datos, mapeadas a metodos HTTP:</p>
+
+      <div class="crud-summary">
+        <div class="crud-card">
+          <div class="badge badge-get">GET</div>
+          <div class="desc">Read<br>Leer datos</div>
+          <div class="status" style="color:var(--green)">Dev.to real</div>
+        </div>
+        <div class="crud-card">
+          <div class="badge badge-post">POST</div>
+          <div class="desc">Create<br>Crear recurso</div>
+          <div class="status" style="color:var(--yellow)">DummyJSON</div>
+        </div>
+        <div class="crud-card">
+          <div class="badge badge-put">PUT</div>
+          <div class="desc">Update<br>Actualizar</div>
+          <div class="status" style="color:var(--yellow)">DummyJSON</div>
+        </div>
+        <div class="crud-card">
+          <div class="badge badge-del">DELETE</div>
+          <div class="desc">Delete<br>Eliminar</div>
+          <div class="status" style="color:var(--yellow)">DummyJSON</div>
+        </div>
+      </div>
+
+      <p>La demo interactiva ejecuta los 7 ejercicios en vivo, con llamadas <code>fetch()</code> reales al servidor:</p>
+
+      <div style="text-align:center;">
+        <a href="demo_crud_devto.html" class="btn-demo">Abrir Demo CRUD Interactiva</a>
+      </div>
+
+      <p style="margin-top:1rem"><strong>Detalle de cada ejercicio:</strong></p>
+
+      <table class="schema-table">
+        <tr><th>#</th><th>Metodo</th><th>Endpoint</th><th>Que demuestra</th></tr>
+        <tr><td>1</td><td><span class="badge badge-get" style="font-size:0.75rem">GET</span></td><td>/articles?tag=ai</td><td>Query params, array response</td></tr>
+        <tr><td>2</td><td><span class="badge badge-get" style="font-size:0.75rem">GET</span></td><td>/articles?tag=webdev</td><td>Mismo endpoint, filtro distinto</td></tr>
+        <tr><td>3</td><td><span class="badge badge-get" style="font-size:0.75rem">GET</span></td><td>/articles/4559844</td><td>Path param, objeto individual</td></tr>
+        <tr><td>4</td><td><span class="badge badge-get" style="font-size:0.75rem">GET</span></td><td>/articles?tag=datascience</td><td>Tercer tag del equipo</td></tr>
+        <tr><td>5</td><td><span class="badge badge-post" style="font-size:0.75rem">POST</span></td><td>dummyjson.com/products/add</td><td>Crear recurso con body JSON</td></tr>
+        <tr><td>6</td><td><span class="badge badge-put" style="font-size:0.75rem">PUT</span></td><td>dummyjson.com/products/1</td><td>Actualizar campos especificos</td></tr>
+        <tr><td>7</td><td><span class="badge badge-del" style="font-size:0.75rem">DELETE</span></td><td>dummyjson.com/products/1</td><td>Eliminar recurso por ID</td></tr>
+      </table>
+
+      <div class="note warn">
+        <strong>PUT vs PATCH:</strong> Tecnicamente, enviar solo algunos campos (como hacemos en el ejercicio 6) es semantica de <strong>PATCH</strong> (actualizacion parcial). <strong>PUT</strong> por definicion reemplaza el recurso completo. DummyJSON acepta ambos de la misma forma, pero en una API estricta, la diferencia importa. En la practica, muchas APIs REST usan PUT para ambos casos.
+      </div>
+
+      <div class="note">
+        <strong>Que pasa si algo sale mal?</strong> Si envias JSON invalido en el body, el servidor responde con status <strong>400 Bad Request</strong>. Si el recurso no existe, responde <strong>404 Not Found</strong>. Si excedes el rate limit, responde <strong>429 Too Many Requests</strong>. Estos codigos HTTP son estandar y significan lo mismo en cualquier API.
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 7 -->
+  <div class="step" id="step7">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <h2>Catalogo consolidado y analisis cruzado</h2>
+    </div>
+    <div class="step-content">
+      <p>Los 3 archivos individuales se consolidan en un <strong>catalogo unico</strong> (<code>catalogo_articulos_devto.json</code>) con metricas agregadas:</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="value">15</div>
+          <div class="label">Articulos totales</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">613</div>
+          <div class="label">Reacciones totales</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">352</div>
+          <div class="label">Comentarios totales</div>
+        </div>
+      </div>
+
+      <p><strong>Hallazgos del analisis cruzado:</strong></p>
+      <table class="schema-table">
+        <tr><th>Metrica</th><th>AI (Daniel)</th><th>WebDev (Stephanie)</th><th>DataSci (Abigail)</th></tr>
+        <tr><td>Reactions totales</td><td style="color:var(--green)">432</td><td>150</td><td>31</td></tr>
+        <tr><td>Comments totales</td><td style="color:var(--green)">263</td><td>83</td><td>6</td></tr>
+        <tr><td>Promedio reactions</td><td style="color:var(--green)">86.4</td><td>30.0</td><td>6.2</td></tr>
+        <tr><td>Promedio reading time</td><td>8.8 min</td><td>5.6 min</td><td>6.4 min</td></tr>
+        <tr><td>Articulos con AI</td><td>2/5 (40%)</td><td>1/5 (20%)</td><td>1/5 (20%)</td></tr>
+      </table>
+
+      <div class="note warn">
+        <strong>Sobre duplicados:</strong> 3 articulos aparecen en mas de una categoria porque tienen multiples tags (por ejemplo, "Most AI Agents..." tiene tags "ai" Y "webdev"). Esto es comportamiento esperado: Dev.to permite hasta 4 tags por articulo, y un mismo articulo puede aparecer en diferentes consultas por tag. Hay <strong>15 entradas pero 12 articulos unicos</strong>. Las metricas usan las 15 entradas (como llegaron de la API), no deduplicadas.
+      </div>
+
+      <div class="note">
+        <strong>Insight:</strong> Los articulos de AI generan 14x mas engagement (reacciones) que los de Data Science y tienen el mayor promedio de lectura (8.8 min). Esto sugiere que un newsletter enfocado en AI tendria mayor traccion y profundidad. Data Science tiene menos volumen pero nichos mas especializados (Snowflake, Jupyter, MCMC).
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 8 -->
+  <div class="step" id="step8">
+    <div class="step-header">
+      <div class="step-num">8</div>
+      <h2>Coleccion Postman para reproducir</h2>
+    </div>
+    <div class="step-content">
+      <p>Se incluye un archivo <code>Practica_DevTo_API.postman_collection.json</code> que se puede <strong>importar directamente en Postman</strong> para reproducir todas las consultas:</p>
+
+      <div class="file-card">
+        <div class="file-icon">&#128640;</div>
+        <div class="file-info">
+          <h4>Practica_DevTo_API.postman_collection.json</h4>
+          <p>8 requests preconfigurados: 5 GET reales a Dev.to + 3 simulados (POST/PUT/DELETE)</p>
+        </div>
+      </div>
+
+      <p><strong>Como importar:</strong></p>
+      <div class="code-block"><span class="comment">// En Postman:</span>
+<span class="number">1.</span> File > Import
+<span class="number">2.</span> Seleccionar el archivo .postman_collection.json
+<span class="number">3.</span> La coleccion aparece con los 8 requests listos
+<span class="number">4.</span> Hacer clic en "Send" en cada request para ver la respuesta
+<span class="comment">// No requiere configurar variables de entorno ni autenticacion</span></div>
+
+      <div class="note success">
+        <strong>Reproducibilidad:</strong> Cualquier persona con Postman instalado puede importar este archivo y ejecutar las mismas consultas que hicimos. Los GET devuelven datos actualizados de Dev.to en tiempo real.
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 9 -->
+  <div class="step" id="step9">
+    <div class="step-header">
+      <div class="step-num">9</div>
+      <h2>Conexion con NoSQL (MongoDB)</h2>
+    </div>
+    <div class="step-content">
+      <p>Cada archivo JSON del equipo se puede insertar directamente en una coleccion de MongoDB sin modificar la estructura:</p>
+
+      <div class="code-block"><span class="comment">// mongosh es la terminal interactiva de MongoDB (como psql para PostgreSQL)</span>
+
+<span class="comment">// 1. "use" selecciona (o crea) una base de datos</span>
+<span class="keyword">use</span> practica_json_devto
+
+<span class="comment">// 2. "db.articulos" accede a la coleccion "articulos" (equivalente a una tabla SQL)</span>
+<span class="comment">//    "insertMany" inserta un array de documentos de golpe</span>
+db.articulos.insertMany([
+  <span class="comment">// ...contenido de daniel_ai_articles.json</span>
+])
+
+<span class="comment">// 3. "find" busca documentos. Las llaves {} son el filtro.</span>
+<span class="comment">//    "$gt" significa "greater than" (mayor que). Es un operador de MongoDB.</span>
+<span class="comment">//    Equivalente SQL: SELECT * FROM articulos WHERE public_reactions_count > 50</span>
+db.articulos.find({
+  <span class="string">"public_reactions_count"</span>: { <span class="keyword">$gt</span>: <span class="number">50</span> }
+})
+
+<span class="comment">// 4. "aggregate" es el pipeline de procesamiento de MongoDB.</span>
+<span class="comment">//    "$group" agrupa documentos (como GROUP BY en SQL).</span>
+<span class="comment">//    "_id" define el campo por el que agrupamos (categoria).</span>
+<span class="comment">//    "$sum: 1" cuenta documentos (como COUNT(*)).</span>
+<span class="comment">//    "$avg" calcula el promedio (como AVG()).</span>
+<span class="comment">//    Equivalente SQL: SELECT categoria, COUNT(*), AVG(reactions) FROM articulos GROUP BY categoria</span>
+db.articulos.aggregate([
+  { <span class="keyword">$group</span>: {
+    <span class="string">"_id"</span>: <span class="string">"$categoria"</span>,
+    <span class="string">"total"</span>: { <span class="keyword">$sum</span>: <span class="number">1</span> },
+    <span class="string">"avg_reactions"</span>: { <span class="keyword">$avg</span>: <span class="string">"$public_reactions_count"</span> }
+  }}
+])</div>
+
+      <p><strong>Comparacion directa SQL vs MongoDB:</strong></p>
+      <table class="schema-table">
+        <tr><th>SQL</th><th>MongoDB</th></tr>
+        <tr><td><code>SELECT * FROM articulos WHERE reactions > 50</code></td><td><code>db.articulos.find({"reactions": {$gt: 50}})</code></td></tr>
+        <tr><td><code>INSERT INTO articulos VALUES (...)</code></td><td><code>db.articulos.insertOne({...})</code></td></tr>
+        <tr><td><code>UPDATE articulos SET title='X' WHERE id=1</code></td><td><code>db.articulos.updateOne({id:1}, {$set:{title:"X"}})</code></td></tr>
+        <tr><td><code>DELETE FROM articulos WHERE id=1</code></td><td><code>db.articulos.deleteOne({id:1})</code></td></tr>
+        <tr><td><code>SELECT cat, COUNT(*), AVG(r) GROUP BY cat</code></td><td><code>db.articulos.aggregate([{$group:{...}}])</code></td></tr>
+      </table>
+
+      <div class="note">
+        <strong>SQL vs NoSQL - la diferencia clave:</strong> En SQL, el campo <code>tag_list</code> (array) necesitaria una tabla intermedia (articulos_tags) con foreign keys. En MongoDB, el array se almacena embebido en el documento. Lo mismo con <code>user</code> (objeto anidado) que en SQL seria una tabla separada con JOIN. Esta es la ventaja del modelo de documentos cuando la estructura es jerarquica.
+      </div>
+
+      <div class="note">
+        <strong>Sobre _id en MongoDB:</strong> Cada documento recibe automaticamente un campo <code>_id</code> unico (tipo ObjectId). Si intentas insertar dos documentos con el mismo <code>_id</code>, MongoDB rechaza el segundo con un error de duplicado. Esto es equivalente a un PRIMARY KEY en SQL.
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 10 -->
+  <div class="step" id="step10">
+    <div class="step-header">
+      <div class="step-num">10</div>
+      <h2>Reflexion del equipo</h2>
+    </div>
+    <div class="step-content">
+      <div class="reflection">
+        <h3>Que aprendimos</h3>
+        <p>Trabajar con una API real en lugar de datos inventados nos obligo a entender la estructura de los datos tal como existen en produccion. Los articulos de Dev.to no tienen una estructura perfectamente uniforme: algunos tienen <code>github_username</code> como null, otros como string. Algunos usan <code>ai_disclosure_level</code>, otros no lo incluyen. Esto es exactamente lo que pasa en el mundo real, y es la razon por la que JSON Schema y las bases NoSQL son necesarios.</p>
+        <p>El ejercicio de dividir el trabajo por tags (ai, webdev, datascience) simula un pipeline real de curaduria de contenido. Cada miembro del equipo actua como un "productor" que alimenta un catalogo central. La validacion con Schema asegura que todos sigamos el mismo formato, aunque los datos vengan de consultas distintas.</p>
+        <p>La diferencia entre leer datos (GET, sin autenticacion) y escribir datos (POST/PUT/DELETE, con API key) refleja los niveles de acceso que existen en cualquier sistema real. No todo usuario puede modificar datos, y eso se controla desde la API, no desde el cliente.</p>
+
+        <h3 style="color:var(--accent); margin-top:1.5rem; margin-bottom:0.8rem;">Reflexiones individuales</h3>
+        <p><strong>Daniel:</strong> Al principio pensaba que todas las APIs devolvian la misma estructura, pero al comparar los 3 archivos me di cuenta de que campos como <code>github_username</code> vienen null en algunos articulos y como string en otros. Eso me hizo entender por que MongoDB no obliga un schema fijo y por que JSON Schema existe como capa de validacion externa.</p>
+        <p><strong>Stephanie:</strong> Lo que mas me sorprendio fue ver que 3 de nuestros articulos aparecieron en dos categorias a la vez. No lo esperaba, pero tiene sentido: un articulo puede tener tags de "ai" y "webdev" al mismo tiempo. Eso me hizo pensar en como se disenan los filtros en una base de datos y por que los arrays son utiles en documentos NoSQL.</p>
+        <p><strong>Abigail:</strong> Trabajar con datos de ciencia de datos fue interesante porque los articulos de mi categoria tenian muchas menos reacciones que los de AI, pero eran mas tecnicos y especializados. Entendi que la popularidad no es lo mismo que la profundidad, y que en un sistema real necesitarias diferentes metricas para filtrar contenido dependiendo de tu audiencia.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTRUCTURA DE ARCHIVOS -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" style="background:linear-gradient(135deg, var(--green), var(--cyan));">&#128193;</div>
+      <h2>Estructura de archivos entregados</h2>
+    </div>
+    <div class="step-content">
+      <div class="tree">
+<span class="folder">practica_json_devto/</span>
+  |- <span class="file-html">index.html</span>                          <span class="comment">  # Esta pagina (guia paso a paso)</span>
+  |- <span class="file-html">demo_crud_devto.html</span>                 <span class="comment">  # Demo interactiva con 7 ejercicios</span>
+  |- <span class="file-json">daniel_ai_articles.json</span>              <span class="comment">  # 5 articulos reales tag:ai</span>
+  |- <span class="file-json">stephanie_webdev_articles.json</span>       <span class="comment">  # 5 articulos reales tag:webdev</span>
+  |- <span class="file-json">abigail_datascience_articles.json</span>    <span class="comment">  # 5 articulos reales tag:datascience</span>
+  |- <span class="file-json">schema_devto_article.json</span>            <span class="comment">  # JSON Schema draft/2020-12</span>
+  |- <span class="file-json">catalogo_articulos_devto.json</span>        <span class="comment">  # Catalogo consolidado (15 articulos)</span>
+  |- <span class="file-json">Practica_DevTo_API.postman_collection.json</span> <span class="comment"># Importar en Postman</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- REFERENCIA RAPIDA -->
+  <div class="step-content" style="margin-top:2rem; border:2px solid var(--accent); background:linear-gradient(135deg, rgba(88,166,255,0.05), rgba(188,140,255,0.05));">
+    <h2 style="color:var(--accent); margin-bottom:1rem; text-align:center;">Referencia Rapida (cheat sheet)</h2>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div>
+        <h4 style="color:var(--green); margin-bottom:0.5rem;">6 tipos de datos JSON</h4>
+        <table class="schema-table" style="margin:0;">
+          <tr><td><span class="type-tag type-string">String</span></td><td>"texto entre comillas"</td></tr>
+          <tr><td><span class="type-tag type-number">Number</span></td><td>42, 3.14 (sin comillas)</td></tr>
+          <tr><td><span class="type-tag type-boolean">Boolean</span></td><td>true o false</td></tr>
+          <tr><td><span class="type-tag" style="background:#2a2020;color:var(--dim)">Null</span></td><td>null (ausencia de valor)</td></tr>
+          <tr><td><span class="type-tag type-array">Array</span></td><td>["a", "b", "c"]</td></tr>
+          <tr><td><span class="type-tag type-object">Object</span></td><td>{"key": "value"}</td></tr>
+        </table>
+      </div>
+      <div>
+        <h4 style="color:var(--yellow); margin-bottom:0.5rem;">CRUD = 4 operaciones</h4>
+        <table class="schema-table" style="margin:0;">
+          <tr><td><span class="badge badge-get" style="font-size:0.75rem">GET</span></td><td><strong>Read</strong> - leer datos</td></tr>
+          <tr><td><span class="badge badge-post" style="font-size:0.75rem">POST</span></td><td><strong>Create</strong> - crear recurso</td></tr>
+          <tr><td><span class="badge badge-put" style="font-size:0.75rem">PUT</span></td><td><strong>Update</strong> - actualizar</td></tr>
+          <tr><td><span class="badge badge-del" style="font-size:0.75rem">DELETE</span></td><td><strong>Delete</strong> - eliminar</td></tr>
+        </table>
+
+        <h4 style="color:var(--purple); margin-top:1rem; margin-bottom:0.5rem;">Query vs Path params</h4>
+        <p style="font-size:0.85rem; color:var(--dim);"><strong>Query:</strong> <code>?tag=ai&per_page=5</code> (filtran la coleccion)</p>
+        <p style="font-size:0.85rem; color:var(--dim);"><strong>Path:</strong> <code>/articles/4559844</code> (apuntan a un recurso)</p>
+      </div>
+    </div>
+
+    <h4 style="color:var(--orange); margin-top:1rem; margin-bottom:0.5rem;">Codigos HTTP comunes</h4>
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+      <span style="background:#1a3a2a; color:var(--green); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>200</strong> OK</span>
+      <span style="background:#1a3a2a; color:var(--green); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>201</strong> Created</span>
+      <span style="background:#3a2a1a; color:var(--yellow); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>400</strong> Bad Request</span>
+      <span style="background:#3a2a1a; color:var(--yellow); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>404</strong> Not Found</span>
+      <span style="background:#3a1a1a; color:var(--red); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>429</strong> Too Many Requests</span>
+      <span style="background:#3a1a1a; color:var(--red); padding:0.2rem 0.6rem; border-radius:4px; font-size:0.82rem;"><strong>500</strong> Server Error</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Practica de JSON en Equipo | Base de Datos NoSQL - 4to Semestre LCDN</p>
+  <p>Prof. Adrian Silva Ramirez | Universidad Nacional Rosario Castellanos | Septiembre 2026</p>
+</div>
+
+</body>
+</html>

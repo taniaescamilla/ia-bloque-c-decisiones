@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dev.to Article Collection",
+  "description": "Schema para validar la coleccion de articulos obtenidos de la API de Dev.to",
+  "type": "object",
+  "required": ["fuente", "endpoint", "responsable", "categoria", "fecha_consulta", "articulos"],
+  "properties": {
+    "fuente": {
+      "type": "string",
+      "const": "Dev.to API"
+    },
+    "endpoint": {
+      "type": "string",
+      "pattern": "^GET https://dev\\.to/api/articles"
+    },
+    "responsable": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string"
+    },
+    "fecha_consulta": {
+      "type": "string",
+      "format": "date"
+    },
+    "total_articulos": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "articulos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "url", "published_at", "reading_time_minutes", "comments_count", "public_reactions_count", "tag_list", "user"],
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "url": { "type": "string", "format": "uri", "pattern": "^https://dev\\.to/" },
+          "published_at": { "type": "string", "format": "date-time" },
+          "reading_time_minutes": { "type": "integer", "minimum": 1 },
+          "comments_count": { "type": "integer", "minimum": 0 },
+          "public_reactions_count": { "type": "integer", "minimum": 0 },
+          "tag_list": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "maxItems": 4
+          },
+          "ai_disclosure_level": {
+            "type": "string",
+            "enum": ["not_disclosed", "some_ai", "fully_ai"]
+          },
+          "user": {
+            "type": "object",
+            "required": ["name", "username"],
+            "properties": {
+              "name": { "type": "string" },
+              "username": { "type": "string" },
+              "github_username": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "analisis": {
+      "type": "object",
+      "properties": {
+        "total_reactions": { "type": "integer" },
+        "total_comments": { "type": "integer" },
+        "promedio_reactions": { "type": "number" },
+        "promedio_reading_time_min": { "type": "number" },
+        "articulo_mas_popular": { "type": "string" },
+        "tags_frecuentes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

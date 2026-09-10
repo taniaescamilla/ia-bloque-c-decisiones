@@ -1,0 +1,87 @@
+{
+  "proyecto": "Practica JSON - Pipeline de Contenido con Dev.to API",
+  "materia": "Base de Datos NoSQL",
+  "profesor": "Adrian Silva Ramirez",
+  "equipo": ["Daniel Ruffo", "Stephanie Valencia", "Abigail Reyes"],
+  "fecha": "2026-09-09",
+  "descripcion": "Catalogo consolidado de 15 articulos obtenidos de la API publica de Dev.to, organizados por categoria tematica. Cada miembro del equipo consulto una categoria distinta para simular un pipeline de curaduria de contenido tipo newsletter.",
+  "api": {
+    "base_url": "https://dev.to/api/articles",
+    "metodo": "GET",
+    "autenticacion": "No requerida para lectura publica",
+    "formato_respuesta": "JSON (array de objetos)",
+    "documentacion": "https://developers.forem.com/api/v1"
+  },
+  "categorias": [
+    {
+      "tag": "ai",
+      "responsable": "Daniel Ruffo",
+      "archivo_fuente": "daniel_ai_articles.json",
+      "total_articulos": 5,
+      "total_reactions": 432,
+      "total_comments": 263,
+      "articulo_top": {
+        "title": "20 Agentic AI Terms Every Developer Should Know (Explained Simply)",
+        "reactions": 217,
+        "id": 4559844
+      }
+    },
+    {
+      "tag": "webdev",
+      "responsable": "Stephanie Valencia",
+      "archivo_fuente": "stephanie_webdev_articles.json",
+      "total_articulos": 5,
+      "total_reactions": 150,
+      "total_comments": 83,
+      "articulo_top": {
+        "title": "Most AI Agents Are Just If-Statements in a Trench Coat",
+        "reactions": 58,
+        "id": 4603458
+      }
+    },
+    {
+      "tag": "datascience",
+      "responsable": "Abigail Reyes",
+      "archivo_fuente": "abigail_datascience_articles.json",
+      "total_articulos": 5,
+      "total_reactions": 31,
+      "total_comments": 6,
+      "articulo_top": {
+        "title": "Markov Chain Monte Carlo: the 1953 algorithm hiding under modern AI",
+        "reactions": 18,
+        "id": 4585631
+      }
+    }
+  ],
+  "metricas_globales": {
+    "total_articulos": 15,
+    "total_reactions": 613,
+    "total_comments": 352,
+    "promedio_reactions_por_articulo": 40.9,
+    "categoria_mas_activa": "ai",
+    "articulo_mas_popular_global": {
+      "title": "20 Agentic AI Terms Every Developer Should Know (Explained Simply)",
+      "reactions": 217,
+      "comments": 115,
+      "autor": "Sylwia Laskowska",
+      "url": "https://dev.to/sylwia-lask/20-agentic-ai-terms-every-developer-should-know-explained-simply-jii"
+    },
+    "total_articulos_unicos": 12,
+    "nota_duplicados": "3 articulos aparecen en 2 categorias por tener multiples tags. Total entries = 15, unicos = 12.",
+    "articulos_con_ai_disclosure": 4,
+    "porcentaje_ai_assisted": 26.7
+  },
+  "aplicacion_newsletter": {
+    "caso_uso": "Curaduria automatizada de contenido trending para newsletter semanal",
+    "flujo": [
+      "1. GET articulos por tag desde Dev.to API",
+      "2. Filtrar por reactions y reading_time",
+      "3. Validar estructura con JSON Schema",
+      "4. Almacenar en base NoSQL (MongoDB)",
+      "5. Generar resumen para newsletter"
+    ],
+    "valor_agregado": "Automatizacion del descubrimiento de contenido relevante sin curaduria manual"
+  },
+  "json_schema_utilizado": "schema_devto_article.json",
+  "postman_collection": "Practica_DevTo_API.postman_collection.json"
+}

@@ -1,0 +1,104 @@
+{
+  "fuente": "Dev.to API",
+  "endpoint": "GET https://dev.to/api/articles?tag=datascience&top=7&per_page=5",
+  "responsable": "Abigail Reyes",
+  "categoria": "Ciencia de Datos",
+  "fecha_consulta": "2026-09-09",
+  "total_articulos": 5,
+  "articulos": [
+    {
+      "id": 4585631,
+      "title": "Markov Chain Monte Carlo: the 1953 algorithm hiding under modern AI",
+      "description": "Hello, I'm Maneshwar, and I'm building LiveReview, a blast-radius aware AI code review...",
+      "url": "https://dev.to/lovestaco/markov-chain-monte-carlo-the-1953-algorithm-hiding-under-modern-ai-5cb4",
+      "published_at": "2026-09-06T04:31:27Z",
+      "reading_time_minutes": 13,
+      "comments_count": 4,
+      "public_reactions_count": 18,
+      "tag_list": ["machinelearning", "python", "datascience", "computerscience"],
+      "ai_disclosure_level": "some_ai",
+      "user": {
+        "name": "Athreya aka Maneshwar",
+        "username": "lovestaco",
+        "github_username": "lovestaco"
+      }
+    },
+    {
+      "id": 4584620,
+      "title": "I analyzed 14,905 love letters without reading them",
+      "description": "I run LovePaper, a site where you write a letter to someone and it becomes a page with a permanent link...",
+      "url": "https://dev.to/enzofalvo/i-analyzed-14905-love-letters-without-reading-them-4760",
+      "published_at": "2026-09-05T22:01:08Z",
+      "reading_time_minutes": 4,
+      "comments_count": 0,
+      "public_reactions_count": 2,
+      "tag_list": ["showdev", "datascience", "javascript", "privacy"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Enzo",
+        "username": "enzofalvo",
+        "github_username": "enzofalvo"
+      }
+    },
+    {
+      "id": 4583741,
+      "title": "Excel Dashboards: Product Analysis for Jumia Kenya",
+      "description": "E-commerce platforms like Jumia collect large amounts of data daily on products, pricing, and customer reviews...",
+      "url": "https://dev.to/zena_muhoro_/excel-dashboards-product-analysis-for-jumia-kenya-cjk",
+      "published_at": "2026-09-05T18:09:55Z",
+      "reading_time_minutes": 5,
+      "comments_count": 1,
+      "public_reactions_count": 8,
+      "tag_list": ["database", "datascience", "analytics", "microsoft"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Zena Muhoro",
+        "username": "zena_muhoro_",
+        "github_username": "zenamuhoro-dot"
+      }
+    },
+    {
+      "id": 4582051,
+      "title": "That messy 4000-line notebook taught me to stop hating Jupyter",
+      "description": "Why Jupyter is still the de facto standard for exploring data, even though versioning it with git will make you want to smash your keyboard.",
+      "url": "https://dev.to/jtorchia/that-messy-4000-line-notebook-taught-me-to-stop-hating-jupyter-2k8d",
+      "published_at": "2026-09-05T12:00:19Z",
+      "reading_time_minutes": 5,
+      "comments_count": 1,
+      "public_reactions_count": 2,
+      "tag_list": ["english", "python", "datascience", "jupyter"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Juan Torchia",
+        "username": "jtorchia",
+        "github_username": "JuanTorchia"
+      }
+    },
+    {
+      "id": 4588903,
+      "title": "Where Need Meets Nothing: finding Florida's aid deserts with Snowflake",
+      "description": "This is a submission for Weekend Challenge: Generosity Edition. Generosity Gap Finder...",
+      "url": "https://dev.to/saif-uk/where-need-meets-nothing-finding-floridas-aid-deserts-with-snowflake-44p2",
+      "published_at": "2026-09-06T22:54:37Z",
+      "reading_time_minutes": 5,
+      "comments_count": 0,
+      "public_reactions_count": 1,
+      "tag_list": ["devchallenge", "weekendchallenge", "snowflake", "datascience"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Saifullah",
+        "username": "saif-uk",
+        "github_username": null
+      }
+    }
+  ],
+  "analisis": {
+    "total_reactions": 31,
+    "total_comments": 6,
+    "promedio_reactions": 6.2,
+    "promedio_reading_time_min": 6.4,
+    "articulo_mas_popular": "Markov Chain Monte Carlo: the 1953 algorithm hiding under modern AI",
+    "tags_frecuentes": ["datascience", "python", "machinelearning", "analytics", "jupyter"],
+    "ai_assisted_percentage": 20
+  }
+}

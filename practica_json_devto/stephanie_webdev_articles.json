@@ -1,0 +1,104 @@
+{
+  "fuente": "Dev.to API",
+  "endpoint": "GET https://dev.to/api/articles?tag=webdev&top=7&per_page=5",
+  "responsable": "Stephanie Valencia",
+  "categoria": "Desarrollo Web",
+  "fecha_consulta": "2026-09-09",
+  "total_articulos": 5,
+  "articulos": [
+    {
+      "id": 4603458,
+      "title": "Most 'AI Agents' Are Just If-Statements in a Trench Coat",
+      "description": "I built an agent last year, and I was proud of it. It had a planner. It had tools...",
+      "url": "https://dev.to/james_anderson_h/most-ai-agents-are-just-if-statements-in-a-trench-coat-3960",
+      "published_at": "2026-09-08T06:12:03Z",
+      "reading_time_minutes": 7,
+      "comments_count": 58,
+      "public_reactions_count": 58,
+      "tag_list": ["ai", "softwareengineering", "webdev", "agents"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "James Anderson",
+        "username": "james_anderson_h",
+        "github_username": null
+      }
+    },
+    {
+      "id": 4613387,
+      "title": "I let AI write 100% of my code for 30 days. Here's what broke.",
+      "description": "Not AI-assisted. Not copilot suggestions I edited. I made a rule: for 30 days, I don't write a single line...",
+      "url": "https://dev.to/infoinlet1/i-let-ai-write-100-of-my-code-for-30-days-heres-what-broke-1aa0",
+      "published_at": "2026-09-09T09:08:18Z",
+      "reading_time_minutes": 5,
+      "comments_count": 6,
+      "public_reactions_count": 27,
+      "tag_list": ["ai", "webdev", "programming", "career"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Info Inlet",
+        "username": "infoinlet1",
+        "github_username": null
+      }
+    },
+    {
+      "id": 4582832,
+      "title": "My OSS Projects: AngleSharp",
+      "description": "This is the first post in a new series, My Open-Source Projects, where I go through some of the projects I created...",
+      "url": "https://dev.to/florianrappl/my-oss-projects-anglesharp-3b8j",
+      "published_at": "2026-09-09T13:30:00Z",
+      "reading_time_minutes": 10,
+      "comments_count": 4,
+      "public_reactions_count": 12,
+      "tag_list": ["dotnet", "opensource", "csharp", "webdev"],
+      "ai_disclosure_level": "some_ai",
+      "user": {
+        "name": "Florian Rappl",
+        "username": "florianrappl",
+        "github_username": null
+      }
+    },
+    {
+      "id": 4562013,
+      "title": "My Dev.to CLI Got Its First Community PR. Image Uploads From Terminal.",
+      "description": "devpub v0.3 adds image uploads via devpub upload. The catch: the Forem API has no image endpoint...",
+      "url": "https://dev.to/sarvar_04/my-devto-cli-got-its-first-community-pr-image-uploads-from-terminal-4562",
+      "published_at": "2026-09-03T11:36:02Z",
+      "reading_time_minutes": 5,
+      "comments_count": 6,
+      "public_reactions_count": 25,
+      "tag_list": ["devto", "opensource", "python", "webdev"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Sarvar Nadaf",
+        "username": "sarvar_04",
+        "github_username": "simplynadaf"
+      }
+    },
+    {
+      "id": 4601385,
+      "title": "Ever Fluorescent: Live Again!",
+      "description": "Excitement! I've had stores on Shopify, and a successful Etsy store. But after years...",
+      "url": "https://dev.to/annavi11arrea1/ever-fluorescent-live-again-132b",
+      "published_at": "2026-09-08T00:43:39Z",
+      "reading_time_minutes": 1,
+      "comments_count": 9,
+      "public_reactions_count": 28,
+      "tag_list": ["webdev", "rails", "programming", "community"],
+      "ai_disclosure_level": "not_disclosed",
+      "user": {
+        "name": "Anna Villarreal",
+        "username": "annavi11arrea1",
+        "github_username": "AnnaVi11arrea1"
+      }
+    }
+  ],
+  "analisis": {
+    "total_reactions": 150,
+    "total_comments": 83,
+    "promedio_reactions": 30.0,
+    "promedio_reading_time_min": 5.6,
+    "articulo_mas_popular": "Most AI Agents Are Just If-Statements in a Trench Coat",
+    "tags_frecuentes": ["webdev", "ai", "opensource", "programming", "career"],
+    "ai_assisted_percentage": 20
+  }
+}
